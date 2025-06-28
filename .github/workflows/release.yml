@@ -1,0 +1,111 @@
+name: Build Release Binaries
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, windows, darwin]
+        goarch: [amd64, arm64]
+        exclude:
+          - goos: windows
+            goarch: arm64
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+
+    - name: Cache Go modules
+      uses: actions/cache@v4
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Get dependencies
+      run: go mod download
+
+    - name: Set binary name
+      id: binary
+      run: |
+        BINARY_NAME=scp-git
+        if [ "${{ matrix.goos }}" = "windows" ]; then
+          BINARY_NAME="${BINARY_NAME}.exe"
+        fi
+        echo "name=${BINARY_NAME}" >> $GITHUB_OUTPUT
+        echo "archive=scp-git-${{ matrix.goos }}-${{ matrix.goarch }}" >> $GITHUB_OUTPUT
+
+    - name: Build binary
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
+        CGO_ENABLED: 0
+      run: |
+        go build -ldflags="-s -w" -o ${{ steps.binary.outputs.name }} .
+
+    - name: Create archive
+      run: |
+        if [ "${{ matrix.goos }}" = "windows" ]; then
+          zip ${{ steps.binary.outputs.archive }}.zip ${{ steps.binary.outputs.name }}
+        else
+          tar -czf ${{ steps.binary.outputs.archive }}.tar.gz ${{ steps.binary.outputs.name }}
+        fi
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.binary.outputs.archive }}
+        path: |
+          ${{ steps.binary.outputs.archive }}.zip
+          ${{ steps.binary.outputs.archive }}.tar.gz
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+
+    - name: Read Release Notes
+      id: notes
+      run: |
+        TAG_NAME=${GITHUB_REF##*/}
+        FILE="docs/releases/${TAG_NAME}.md"
+        echo "Looking for release notes at $FILE"
+        if [ -f "$FILE" ]; then
+          CONTENT=$(cat "$FILE")
+          echo "release_notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$CONTENT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        elif [ -f "release.md" ]; then
+          CONTENT=$(cat "release.md")
+          echo "release_notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$CONTENT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        else
+          echo "release_notes=Release ${TAG_NAME} of SCP-████: The Self-Modifying Codebase" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        body: ${{ steps.notes.outputs.release_notes }}
+        files: |
+          **/scp-git-*
+        draft: false
+        prerelease: false

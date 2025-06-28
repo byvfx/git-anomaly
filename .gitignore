@@ -28,5 +28,53 @@ go.work.sum
 .env
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Built binaries (project specific)
+bin/
+scp-git
+scp-git-*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Project specific directories
+/dist/
+/build/
+/release/
+/releases/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Air live reload (if used for development)
+tmp/
+.air.toml
+
+# Delve debugger
+__debug_bin*
+
+# Additional environment files
+.env.local
+.env.*.local
+
+# macOS specific
+.AppleDouble
+.LSOverride

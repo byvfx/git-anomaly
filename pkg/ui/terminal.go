@@ -184,7 +184,6 @@ func (t *Terminal) DisplayHelp() {
 		{"git status", "View repository status"},
 		{"git branch [name]", "Create or list containment branches"},
 		{"git checkout <branch>", "Switch containment branches"},
-		{"tea", "Visit the break room (restore sanity)"},
 		{"quit", "Exit containment protocols (progress saved)"},
 	}
 	

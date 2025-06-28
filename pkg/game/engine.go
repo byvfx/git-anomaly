@@ -103,8 +103,6 @@ func (e *Engine) ProcessCommand(input string) CommandResult {
 			Success: true,
 			Message: "", // UI will display status
 		}
-	case "tea":
-		return e.handleTeaBreak()
 	default:
 		return CommandResult{
 			Success:      false,
@@ -115,35 +113,6 @@ func (e *Engine) ProcessCommand(input string) CommandResult {
 	}
 }
 
-// handleTeaBreak processes the tea break command
-func (e *Engine) handleTeaBreak() CommandResult {
-	// Simple tea break for Phase 1
-	if e.State.ResearcherSanity >= 100 {
-		return CommandResult{
-			Success:   true,
-			Message:   "You're already at maximum focus!",
-			SCPEffect: "☕ The break room environmental system indicates optimal researcher condition",
-		}
-	}
-	
-	e.State.IncreaseSanity(15)
-	
-	messages := []string{
-		"☕ You take a refreshing break. The facility's environmental system adjusts the lighting to a calming level.",
-		"☕ The break room's automated climate control creates a perfect atmosphere for recovery.",
-		"☕ You notice the ventilation system providing a gentle, soothing breeze.",
-	}
-	
-	// Pick a random message (simplified for Phase 1)
-	msg := messages[e.State.Score%len(messages)]
-	
-	return CommandResult{
-		Success:     true,
-		Message:     "You take a short break to maintain focus.",
-		SCPEffect:   msg,
-		SanityDelta: 0, // Already applied above
-	}
-}
 
 // IsLevelComplete checks if the current level is complete
 func (e *Engine) IsLevelComplete() bool {

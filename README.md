@@ -6,6 +6,8 @@ An interactive CLI game that teaches Git concepts through an SCP Foundation horr
 
 You are a newly assigned Junior Researcher in the SCP Foundation's Digital Anomalies Division. Your assignment: contain an anomalous self-modifying codebase using proper Git procedures. But be careful - each command you execute teaches the entity more about our reality...
 
+> ⚠️ **Early Development Notice**: This game is currently in early development. Features, gameplay mechanics, and story elements are subject to change. Some planned features may not yet be implemented.
+
 ## 🚀 Quick Start
 
 ### Installation
@@ -44,8 +46,6 @@ go run main.go
    - **Researcher Sanity**: Decreases with stress (0% = game over)
    - **Containment Status**: SECURE → BREACH → CRITICAL
 
-4. Take breaks with `tea` command to restore sanity
-
 ## 📋 Commands
 
 | Command | Description |
@@ -53,7 +53,6 @@ go run main.go
 | `help` | Display available commands |
 | `start` | Begin the game |
 | `status` | Check current game status |
-| `tea` | Take a break (restore sanity) |
 | `clear` | Clear the screen |
 | `quit` | Exit the game |
 

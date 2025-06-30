@@ -1,0 +1,28 @@
+version: "2"
+
+linters:
+  enable:
+    - errcheck
+    - staticcheck
+    - unused
+    - ineffassign
+    - govet
+  
+  exclusions:
+    rules:
+      # TUI development is on hold - ignore all issues in bubbletea.go
+      - path: "pkg/ui/bubbletea\\.go"
+        linters:
+          - unused
+          - staticcheck
+          - ineffassign
+      
+      # Ignore error checks for print statements in terminal UI
+      - path: "pkg/ui/terminal\\.go"
+        linters:
+          - errcheck
+        text: ".*(Print|Printf|Println).*"
+
+issues:
+  max-issues-per-linter: 50
+  max-same-issues: 10

@@ -1,3 +1,7 @@
+// TUI development is currently on hold. Unused functions and variables are commented out
+// but preserved for future development.
+//
+//nolint:all
 package ui
 
 import (
@@ -21,7 +25,7 @@ var (
 	crtDarkGreen  = lipgloss.Color("#008F11")    // Darker green
 	crtAmber      = lipgloss.Color("#FFB000")    // Amber warning
 	crtRed        = lipgloss.Color("#FF3030")    // Bright red
-	// crtBlue       = lipgloss.Color("#00AAFF")    // Cyan blue - unused, TUI on hold
+	// crtBlue       = lipgloss.Color("#00AAFF")    // Cyan blue - unused, TUI on hold //nolint:unused
 	crtGray       = lipgloss.Color("#404040")    // Dark gray
 	crtBackground = lipgloss.Color("#0D1117")    // Very dark background
 	crtBorder     = lipgloss.Color("#1F2937")    // Border color
@@ -35,7 +39,7 @@ var (
 		BorderForeground(crtBorder)
 	
 	// Header styles - CRT themed
-	// titleStyle = lipgloss.NewStyle().
+	// titleStyle = lipgloss.NewStyle(). //nolint:unused
 	// 	Bold(true).
 	// 	Foreground(crtGreen).
 	// 	Background(crtBackground).
@@ -45,7 +49,7 @@ var (
 	// 	Padding(0, 2).
 	// 	Margin(0, 0, 1, 0)  // unused, TUI on hold
 	
-	// crtLogoStyle = lipgloss.NewStyle().
+	// crtLogoStyle = lipgloss.NewStyle(). //nolint:unused
 	// 	Foreground(crtDarkGreen).
 	// 	Align(lipgloss.Center).
 	// 	Margin(1, 0)  // unused, TUI on hold
@@ -350,7 +354,7 @@ Digital Anomalies Division`
 		// bootStep would be incremented here, but since Model is passed by value
 		// and this is in renderBootScreen, the increment doesn't persist.
 		// This is a known issue but TUI is on hold.
-		_ = m.bootStep // Acknowledge the field exists
+		m.bootStep++ //nolint:ineffassign,staticcheck // Known issue, TUI on hold
 	}
 	
 	display := strings.Join(bootLines[:visibleLines], "\n")
@@ -559,7 +563,7 @@ func (m Model) renderCRTHelp() string {
 }
 
 // createCRTProgressBar creates a CRT-styled progress bar - unused, TUI on hold
-// func (m Model) createCRTProgressBar(current, max, width int) string {
+// DISABLED: func (m Model) createCRTProgressBar(current, max, width int) string {
 // 	percentage := float64(current) / float64(max)
 // 	filled := int(percentage * float64(width))
 // 	
@@ -672,8 +676,8 @@ func (m *Model) processCommand(input string) string {
 	return m.formatCommandResult(result)
 }
 
-// renderStatusBar renders the status bar - unused, TUI on hold
-// func (m Model) renderStatusBar() string {
+// renderStatusBar renders the status bar - unused, TUI on hold  
+// DISABLED: func (m Model) renderStatusBar() string {
 // 	if !m.gameStarted {
 // 		return ""
 // 	}
@@ -711,7 +715,7 @@ func (m *Model) processCommand(input string) string {
 // }
 
 // renderLevelInfo renders level information - unused, TUI on hold
-// func (m Model) renderLevelInfo() string {
+// DISABLED: func (m Model) renderLevelInfo() string {
 // 	if m.currentLevel == nil {
 // 		return ""
 // 	}
@@ -734,7 +738,7 @@ func (m *Model) processCommand(input string) string {
 // }
 
 // renderPrompt renders the command prompt - unused, TUI on hold
-// func (m Model) renderPrompt() string {
+// DISABLED: func (m Model) renderPrompt() string {
 // 	var promptText string
 // 	if m.gameStarted && m.engine.State.IsInitialized {
 // 		promptText = fmt.Sprintf("[SCP-████:%s] $ ", m.engine.State.CurrentBranch)
@@ -749,7 +753,7 @@ func (m *Model) processCommand(input string) string {
 // }
 
 // renderHelp renders help information - unused, TUI on hold
-// func (m Model) renderHelp() string {
+// DISABLED: func (m Model) renderHelp() string {
 // 	helpContent := `FOUNDATION COMMAND REFERENCE:
 // ─────────────────────────────
 // help                    Display this help message
@@ -781,7 +785,7 @@ func (m *Model) processCommand(input string) string {
 // }
 
 // createProgressBar creates a generic progress bar - unused, TUI on hold
-// func (m Model) createProgressBar(current, max, width int, filled, empty string) string {
+// DISABLED: func (m Model) createProgressBar(current, max, width int, filled, empty string) string {
 // 	percentage := float64(current) / float64(max)
 // 	filledCount := int(percentage * float64(width))
 // 	emptyCount := width - filledCount

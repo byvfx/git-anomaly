@@ -32,153 +32,217 @@ func GetLevel(levelNum int) *Level {
 		return &Level2
 	case 3:
 		return &Level3
+	case 4:
+		return &Level4
 	default:
 		return nil
 	}
 }
 
-// Level1 - Initial Containment
+// Level1 - Initial Containment Setup
 var Level1 = Level{
 	ID:          1,
-	Title:       "Initial Containment",
+	Title:       "Initial Containment Setup",
 	SCPNumber:   "SCP-████",
 	ObjectClass: "Safe",
-	Description: "A simple anomalous file has been discovered. Establish initial containment.",
-	Objective:   "Initialize repository and commit the anomalous file",
+	Description: "A new anomalous codebase has been discovered. Establish initial containment protocols by setting up version control.",
+	Objective:   "Configure git, initialize repository, and perform initial commit of all files",
 
 	InitialFiles: map[string]string{
-		"anomaly.txt": "This file writes itself...",
+		"README.txt":      "Project SCP-████: Anomalous Codebase Documentation",
+		"anomaly.txt":     "This file writes itself...",
+		"containment.log": "Day 1: Initial discovery. File behavior appears autonomous.",
 	},
 
-	RequiredCommands: []string{"git init", "git add", "git commit"},
+	RequiredCommands: []string{"git config", "git init", "git add .", "git commit"},
 
-	ContainmentProcs: `All personnel must initialize proper version control before 
-handling anomalous digital materials. Standard git protocols 
-apply with enhanced monitoring.`,
+	ContainmentProcs: `CONTAINMENT PROTOCOL SCP-████-CP1:
+1. Configure researcher identity for accountability
+2. Initialize secure version control repository  
+3. Stage ALL discovered files for tracking
+4. Perform initial containment commit
+
+Note: Use 'git add .' to stage all files at once`,
 
 	IncidentReport: `INCIDENT LOG ████-1
-An anomalous text file has been discovered on Foundation servers.
-File appears to modify its own contents when unobserved.
-Immediate containment via version control required.`,
+Digital anomaly discovered on Foundation server Gamma-7.
+Multiple files showing autonomous behavior patterns.
+Dr. ████████ assigned as lead researcher.
+IMMEDIATE ACTION: Establish version control for all files.`,
 
 	ValidateFunc: func(state *GameState) (bool, string) {
+		// Check git config was used
+		if state.ConfigName == "" || state.ConfigEmail == "" {
+			return false, "Researcher identity not configured (use git config)"
+		}
 		if !state.IsInitialized {
 			return false, "Repository not initialized"
 		}
 		if len(state.Commits) == 0 {
-			return false, "No commits found - anomaly not contained"
+			return false, "No commits found - initial containment incomplete"
 		}
-		return true, "✅ SCP-████ successfully contained"
+		// Check that all files were committed
+		commit := state.Commits[len(state.Commits)-1]
+		if len(commit.Files) < 3 {
+			return false, "Not all files contained - use 'git add .' to stage all files"
+		}
+		return true, "✅ Initial containment established. All files secured."
 	},
 
 	ScoreReward: 100,
 	UnlocksNext: []int{2},
 }
 
-// Level2 - Staging Area Protocols
+// Level2 - Monitoring Changes
 var Level2 = Level{
 	ID:          2,
-	Title:       "Staging Area Protocols",
+	Title:       "Monitoring Changes",
 	SCPNumber:   "SCP-████-A",
 	ObjectClass: "Euclid",
-	Description: "Multiple anomalous files detected. Learn proper staging procedures.",
-	Objective:   "Stage and commit only the safe files, avoiding the dangerous anomaly",
+	Description: "The entity has begun modifying files. Track and document all changes carefully.",
+	Objective:   "Learn to monitor file changes using git status and git diff, then commit the modifications",
 
 	InitialFiles: map[string]string{
-		"safe_file.txt":  "Normal file content",
-		"anomaly_1.txt":  "I change when you're not looking",
-		"anomaly_2.txt":  "I multiply when staged",
-		"research.txt":   "Research notes on the anomaly",
-		"classified.txt": "[DATA EXPUNGED]",
+		"README.txt":      "Project SCP-████: Anomalous Codebase Documentation\n\n[REDACTED]",
+		"anomaly.txt":     "This file writes itself...\nLine 2: Added by the entity",
+		"containment.log": "Day 1: Initial discovery. File behavior appears autonomous.\nDay 2: Files showing signs of self-modification.",
+		"research.txt":    "Research notes on SCP-████ behavior patterns.",
 	},
 
-	RequiredCommands: []string{"git add", "git status", "git commit"},
+	RequiredCommands: []string{"git add", "git status", "git diff", "git commit -a"},
 
-	ContainmentProcs: `Personnel must carefully stage files to prevent 
-cross-contamination. Only verified safe files should be 
-committed to the repository. Use 'git status' frequently 
-to monitor containment status.`,
+	ContainmentProcs: `CONTAINMENT PROTOCOL SCP-████-CP2:
+1. Use 'git status' to identify modified files
+2. Use 'git diff' to examine specific changes
+3. Stage individual files OR use 'git commit -a' to commit all changes
+4. Document all modifications in commit messages
+
+IMPORTANT: The entity learns from our actions. Monitor all changes.`,
 
 	IncidentReport: `INCIDENT LOG ████-2
-Multiple anomalous files detected in research directory.
-Some files exhibit replication behavior when staged.
-Exercise extreme caution during staging procedures.`,
+08:30 - Routine file check reveals autonomous modifications
+08:45 - Multiple files show timestamp changes without user input
+09:00 - Content analysis reveals structured patterns in modifications
+ACTION: Document all changes for pattern analysis`,
 
 	ValidateFunc: func(state *GameState) (bool, string) {
+		// This level starts with files already committed from Level 1
+		// So we need at least 2 commits (initial + modifications)
 		if len(state.Commits) < 2 {
-			return false, "Insufficient commits for proper containment"
+			return false, "Modifications not yet committed"
 		}
 		
-		// Check if any anomaly files were committed
-		for _, commit := range state.Commits {
-			for filename := range commit.Files {
-				if filename == "anomaly_1.txt" || filename == "anomaly_2.txt" {
-					return false, "⚠️ CONTAINMENT BREACH: Anomalous files committed!"
-				}
-			}
-		}
-		
-		// Check if safe files were committed
+		// Check that the player used git diff or status (tracked by command history)
+		// For now, we'll just check that they made a commit
 		lastCommit := state.Commits[len(state.Commits)-1]
-		if _, hasResearch := lastCommit.Files["research.txt"]; !hasResearch {
-			return false, "Research notes not properly secured"
+		
+		if len(lastCommit.Files) < 3 {
+			return false, "Not all modified files were committed"
 		}
 		
-		return true, "✅ SCP-████-A contained with proper staging protocols"
+		return true, "✅ All modifications documented. Pattern analysis complete."
 	},
 
 	ScoreReward: 150,
 	UnlocksNext: []int{3},
 }
 
-// Level3 - Branch Containment Procedures
+// Level3 - Historical Analysis  
 var Level3 = Level{
 	ID:          3,
-	Title:       "Branch Containment Procedures",
+	Title:       "Historical Analysis",
 	SCPNumber:   "SCP-████-B",
 	ObjectClass: "Euclid",
-	Description: "The anomaly has spread. Use branching to isolate the contamination.",
-	Objective:   "Create a containment branch and isolate the anomaly",
+	Description: "Investigate the entity's past behavior through commit history analysis.",
+	Objective:   "Use git log, git log -p, and git show to understand the anomaly's evolution",
 
 	InitialFiles: map[string]string{
-		"system.txt":     "Core system files",
-		"spreading.txt":  "ERROR: FILE CORRUPTION DETECTED",
-		"backup.txt":     "Last known good configuration",
-		"monitor.log":    "Anomaly detection log",
+		"anomaly.txt":     "ERROR ERROR ERROR ERROR\nThe pattern is changing...",
+		"research.log":    "Day 3: Entity shows learning behavior\nDay 4: Patterns detected in modifications",
+		"timeline.txt":    "Tracking anomaly evolution over time",
+		"analysis.txt":    "Pattern analysis results pending...",
 	},
 
-	RequiredCommands: []string{"git branch", "git checkout", "git add", "git commit"},
+	RequiredCommands: []string{"git log", "git log -p", "git show"},
 
-	ContainmentProcs: `When contamination is detected, immediately create 
-an isolation branch. Move all anomalous materials to the 
-containment branch while keeping main branch clean.`,
+	ContainmentProcs: `CONTAINMENT PROTOCOL SCP-████-CP3:
+1. Use 'git log' to view commit history
+2. Use 'git log -p' to see detailed changes in each commit
+3. Use 'git show <commit>' to examine specific commits
+4. Document patterns in entity behavior
+
+CRITICAL: Understanding its history may reveal weaknesses.`,
 
 	IncidentReport: `INCIDENT LOG ████-3
-Anomaly has begun spreading through the file system.
-Standard containment insufficient. Branch isolation required.
-Main branch must remain uncontaminated at all costs.`,
+10:00 - Historical analysis authorized by O5 Council
+10:30 - Previous researchers' notes recovered from commits
+11:00 - Pattern emerging in entity's modifications
+ACTION: Deep forensic analysis of all commits`,
 
 	ValidateFunc: func(state *GameState) (bool, string) {
-		// Check if containment branch exists
-		if _, exists := state.Branches["containment"]; !exists {
-			return false, "No containment branch created"
+		// For historical analysis level, we just need to ensure commits exist
+		if len(state.Commits) < 3 {
+			return false, "Insufficient historical data for analysis"
 		}
 		
-		// Check if main branch is clean
-		mainCommits := state.Branches["main"]
-		if len(mainCommits) == 0 {
-			return false, "Main branch compromised"
-		}
-		
-		// Verify anomaly is isolated in containment branch
-		containmentCommits := state.Branches["containment"]
-		if len(containmentCommits) == 0 {
-			return false, "Anomaly not properly isolated"
-		}
-		
-		return true, "✅ SCP-████-B successfully isolated in containment branch"
+		// This level is complete once enough history exists
+		// In a real implementation, we'd track if git log commands were used
+		return true, "✅ Historical analysis complete. Entity patterns documented."
 	},
 
 	ScoreReward: 200,
 	UnlocksNext: []int{4},
+}
+
+// Level4 - Parallel Containment Strategies
+var Level4 = Level{
+	ID:          4,
+	Title:       "Parallel Containment Strategies",
+	SCPNumber:   "SCP-████-C",
+	ObjectClass: "Keter",
+	Description: "The entity has evolved. Test multiple containment approaches simultaneously using branches.",
+	Objective:   "Create branches for different strategies, test approaches, and merge successful containment",
+
+	InitialFiles: map[string]string{
+		"core.sys":        "CRITICAL: System core - handle with extreme care",
+		"anomaly.exe":     "ACTIVE THREAT - DO NOT EXECUTE",
+		"strategy_a.txt":  "Containment Strategy A: Isolation Protocol",
+		"strategy_b.txt":  "Containment Strategy B: Neutralization Protocol",
+		"monitor.log":     "Real-time anomaly behavior tracking",
+	},
+
+	RequiredCommands: []string{"git branch", "git switch", "git merge"},
+
+	ContainmentProcs: `CONTAINMENT PROTOCOL SCP-████-CP4:
+1. Create separate branches for each containment strategy
+2. Use 'git switch -c <branch>' to create and switch
+3. Test different approaches in isolation
+4. Merge successful strategies back to main
+5. Delete failed experiment branches
+
+CRITICAL: The entity adapts. Multiple strategies increase success probability.`,
+
+	IncidentReport: `INCIDENT LOG ████-4
+12:00 - Entity shows rapid evolution, previous containment failing
+12:30 - O5 authorizes parallel containment experiments
+13:00 - Multiple research teams assigned different approaches
+ACTION: Implement branching strategy immediately`,
+
+	ValidateFunc: func(state *GameState) (bool, string) {
+		// Check for multiple branches
+		if len(state.Branches) < 3 {
+			return false, "Insufficient parallel experiments (need at least 3 branches)"
+		}
+		
+		// Check for merge (main branch should have commits from other branches)
+		mainCommits := state.Branches["main"]
+		if len(mainCommits) < 4 {
+			return false, "No successful strategies merged to main branch"
+		}
+		
+		return true, "✅ Optimal containment strategy identified and implemented."
+	},
+
+	ScoreReward: 250,
+	UnlocksNext: []int{5},
 }

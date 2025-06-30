@@ -1,14 +1,19 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"strings"
 
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/chzyer/readline"
 	"github.com/spf13/cobra"
 	"github.com/byvfx/git-anomaly/pkg/game"
 	"github.com/byvfx/git-anomaly/pkg/ui"
+)
+
+var (
+	useTUI bool
 )
 
 var rootCmd = &cobra.Command{
@@ -30,36 +35,76 @@ func Execute() {
 }
 
 func init() {
-	// Add flags here if needed
+	rootCmd.Flags().BoolVarP(&useTUI, "tui", "t", true, "Use the modern TUI interface (default)")
+	rootCmd.Flags().BoolP("classic", "c", false, "Use the classic CLI interface")
 }
 
 func runGame(cmd *cobra.Command, args []string) {
+	// Check if classic mode is requested
+	classic, _ := cmd.Flags().GetBool("classic")
+	if classic {
+		useTUI = false
+	}
+	
+	if useTUI {
+		// Use modern Bubble Tea TUI
+		runTUIGame()
+	} else {
+		// Use classic CLI interface
+		runClassicGame()
+	}
+}
+
+func runTUIGame() {
+	model := ui.NewModel()
+	
+	program := tea.NewProgram(
+		model,
+		tea.WithAltScreen(),
+		tea.WithMouseCellMotion(),
+	)
+	
+	if _, err := program.Run(); err != nil {
+		fmt.Printf("Error running TUI: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func runClassicGame() {
 	// Initialize game components
 	engine := game.NewEngine()
 	terminal := ui.NewTerminal()
-	scanner := bufio.NewScanner(os.Stdin)
 	
 	// Display welcome screen
 	terminal.ClearScreen()
 	terminal.DisplayWelcome()
 	
+	// Configure readline
+	rl, err := setupReadline(engine)
+	if err != nil {
+		fmt.Printf("Error setting up readline: %v\n", err)
+		os.Exit(1)
+	}
+	defer rl.Close()
+	
 	// Main game loop
 	gameStarted := false
 	
 	for {
-		// Display prompt
+		// Set prompt
+		prompt := "[SCP-████] $ "
 		if gameStarted && engine.State.IsInitialized {
-			terminal.DisplayPrompt(engine.State.CurrentBranch)
-		} else {
-			terminal.DisplayPrompt("")
+			prompt = fmt.Sprintf("[SCP-████:%s] $ ", engine.State.CurrentBranch)
 		}
+		rl.SetPrompt(prompt)
 		
 		// Read user input
-		if !scanner.Scan() {
+		line, err := rl.Readline()
+		if err != nil { // io.EOF or interrupt
 			break
 		}
 		
-		input := strings.TrimSpace(scanner.Text())
+		input := strings.TrimSpace(line)
 		if input == "" {
 			continue
 		}
@@ -104,6 +149,14 @@ func runGame(cmd *cobra.Command, args []string) {
 				terminal.DisplayError("No game in progress. Type 'start' to begin.")
 			}
 			continue
+			
+		case "brief", "briefing", "objective", "objectives":
+			if gameStarted && engine.CurrentLevel != nil {
+				terminal.DisplayLevelIntro(engine.CurrentLevel)
+			} else {
+				terminal.DisplayError("No active containment protocol. Type 'start' to begin.")
+			}
+			continue
 		}
 		
 		// Process game commands
@@ -139,9 +192,10 @@ func runGame(cmd *cobra.Command, args []string) {
 			
 			nextLevel := engine.GetNextLevel()
 			if nextLevel > 0 && nextLevel <= 3 {
-				fmt.Printf("\nProceed to Level %d? (y/n): ", nextLevel)
-				if scanner.Scan() {
-					response := strings.ToLower(strings.TrimSpace(scanner.Text()))
+				rl.SetPrompt(fmt.Sprintf("\nProceed to Level %d? (y/n): ", nextLevel))
+				response, err := rl.Readline()
+				if err == nil {
+					response = strings.ToLower(strings.TrimSpace(response))
 					if response == "y" || response == "yes" {
 						err := engine.StartLevel(nextLevel)
 						if err != nil {
@@ -167,4 +221,128 @@ func runGame(cmd *cobra.Command, args []string) {
 			terminal.DisplayGameStatus(engine.State)
 		}
 	}
+}
+
+// setupReadline configures readline with tab completion and command history
+func setupReadline(engine *game.Engine) (*readline.Instance, error) {
+	// Define completer for tab completion
+	completer := readline.NewPrefixCompleter(
+		// Meta commands
+		readline.PcItem("help"),
+		readline.PcItem("start"),
+		readline.PcItem("status"),
+		readline.PcItem("brief"),
+		readline.PcItem("briefing"),
+		readline.PcItem("objective"),
+		readline.PcItem("objectives"),
+		readline.PcItem("breathe"),
+		readline.PcItem("clear"),
+		readline.PcItem("quit"),
+		readline.PcItem("exit"),
+		
+		// Git commands
+		readline.PcItem("git",
+			readline.PcItem("config",
+				readline.PcItem("user.name"),
+				readline.PcItem("user.email"),
+			),
+			readline.PcItem("init"),
+			readline.PcItem("add",
+				readline.PcItemDynamic(func(line string) []string {
+					// Dynamic completion for filenames
+					if engine.State == nil || engine.State.WorkingDir == nil {
+						return []string{}
+					}
+					
+					var files []string
+					for filename := range engine.State.WorkingDir {
+						files = append(files, filename)
+					}
+					// Also add common wildcards
+					files = append(files, ".", "*")
+					return files
+				}),
+			),
+			readline.PcItem("commit",
+				readline.PcItem("-m"),
+				readline.PcItem("-a"),
+			),
+			readline.PcItem("status"),
+			readline.PcItem("diff"),
+			readline.PcItem("log",
+				readline.PcItem("-p"),
+			),
+			readline.PcItem("show"),
+			readline.PcItem("branch"),
+			readline.PcItem("checkout",
+				readline.PcItemDynamic(func(line string) []string {
+					// Dynamic completion for branch names
+					if engine.State == nil || engine.State.Branches == nil {
+						return []string{}
+					}
+					
+					var branches []string
+					for branch := range engine.State.Branches {
+						branches = append(branches, branch)
+					}
+					branches = append(branches, "-b")
+					return branches
+				}),
+			),
+			readline.PcItem("switch",
+				readline.PcItem("-c"),
+				readline.PcItemDynamic(func(line string) []string {
+					// Dynamic completion for branch names
+					if engine.State == nil || engine.State.Branches == nil {
+						return []string{}
+					}
+					
+					var branches []string
+					for branch := range engine.State.Branches {
+						branches = append(branches, branch)
+					}
+					return branches
+				}),
+			),
+			readline.PcItem("merge",
+				readline.PcItemDynamic(func(line string) []string {
+					// Dynamic completion for branch names
+					if engine.State == nil || engine.State.Branches == nil {
+						return []string{}
+					}
+					
+					var branches []string
+					for branch := range engine.State.Branches {
+						if branch != engine.State.CurrentBranch {
+							branches = append(branches, branch)
+						}
+					}
+					return branches
+				}),
+			),
+		),
+	)
+	
+	// Configure readline
+	config := &readline.Config{
+		Prompt:              "[SCP-████] $ ",
+		HistoryFile:         "/tmp/scp-git-history",
+		AutoComplete:        completer,
+		InterruptPrompt:     "^C",
+		EOFPrompt:           "exit",
+		HistorySearchFold:   true,
+		FuncFilterInputRune: filterInput,
+	}
+	
+	return readline.NewEx(config)
+}
+
+// filterInput allows certain special characters in input
+func filterInput(r rune) (rune, bool) {
+	switch r {
+	// Allow all printable characters
+	case readline.CharCtrlZ:
+		return r, false
+	}
+	return r, true
 }

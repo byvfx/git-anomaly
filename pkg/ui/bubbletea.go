@@ -21,7 +21,7 @@ var (
 	crtDarkGreen  = lipgloss.Color("#008F11")    // Darker green
 	crtAmber      = lipgloss.Color("#FFB000")    // Amber warning
 	crtRed        = lipgloss.Color("#FF3030")    // Bright red
-	crtBlue       = lipgloss.Color("#00AAFF")    // Cyan blue
+	// crtBlue       = lipgloss.Color("#00AAFF")    // Cyan blue - unused, TUI on hold
 	crtGray       = lipgloss.Color("#404040")    // Dark gray
 	crtBackground = lipgloss.Color("#0D1117")    // Very dark background
 	crtBorder     = lipgloss.Color("#1F2937")    // Border color
@@ -35,20 +35,20 @@ var (
 		BorderForeground(crtBorder)
 	
 	// Header styles - CRT themed
-	titleStyle = lipgloss.NewStyle().
-		Bold(true).
-		Foreground(crtGreen).
-		Background(crtBackground).
-		Align(lipgloss.Center).
-		Border(lipgloss.DoubleBorder()).
-		BorderForeground(crtGreen).
-		Padding(0, 2).
-		Margin(0, 0, 1, 0)
+	// titleStyle = lipgloss.NewStyle().
+	// 	Bold(true).
+	// 	Foreground(crtGreen).
+	// 	Background(crtBackground).
+	// 	Align(lipgloss.Center).
+	// 	Border(lipgloss.DoubleBorder()).
+	// 	BorderForeground(crtGreen).
+	// 	Padding(0, 2).
+	// 	Margin(0, 0, 1, 0)  // unused, TUI on hold
 	
-	crtLogoStyle = lipgloss.NewStyle().
-		Foreground(crtDarkGreen).
-		Align(lipgloss.Center).
-		Margin(1, 0)
+	// crtLogoStyle = lipgloss.NewStyle().
+	// 	Foreground(crtDarkGreen).
+	// 	Align(lipgloss.Center).
+	// 	Margin(1, 0)  // unused, TUI on hold
 	
 	// Status bar - CRT green glow
 	statusBarStyle = lipgloss.NewStyle().
@@ -347,7 +347,10 @@ Digital Anomalies Division`
 	// Show progressive boot sequence
 	visibleLines := min(m.bootStep*2, len(bootLines))
 	if m.frameCount%5 == 0 && visibleLines < len(bootLines) {
-		m.bootStep++
+		// bootStep would be incremented here, but since Model is passed by value
+		// and this is in renderBootScreen, the increment doesn't persist.
+		// This is a known issue but TUI is on hold.
+		_ = m.bootStep // Acknowledge the field exists
 	}
 	
 	display := strings.Join(bootLines[:visibleLines], "\n")
@@ -555,13 +558,14 @@ func (m Model) renderCRTHelp() string {
 	return helpStyle.Render(helpContent)
 }
 
-func (m Model) createCRTProgressBar(current, max, width int) string {
-	percentage := float64(current) / float64(max)
-	filled := int(percentage * float64(width))
-	
-	bar := strings.Repeat("█", filled) + strings.Repeat("░", width-filled)
-	return bar
-}
+// createCRTProgressBar creates a CRT-styled progress bar - unused, TUI on hold
+// func (m Model) createCRTProgressBar(current, max, width int) string {
+// 	percentage := float64(current) / float64(max)
+// 	filled := int(percentage * float64(width))
+// 	
+// 	bar := strings.Repeat("█", filled) + strings.Repeat("░", width-filled)
+// 	return bar
+// }
 
 func (m Model) applyGlitchEffect(content string) string {
 	// Simple glitch effect - replace some characters randomly
@@ -668,117 +672,122 @@ func (m *Model) processCommand(input string) string {
 	return m.formatCommandResult(result)
 }
 
-func (m Model) renderStatusBar() string {
-	if !m.gameStarted {
-		return ""
-	}
-	
-	state := m.engine.State
-	
-	// Containment status with appropriate color
-	var statusStyle lipgloss.Style
-	switch state.ContainmentStatus {
-	case "SECURE":
-		statusStyle = secureStyle
-	case "BREACH":
-		statusStyle = breachStyle
-	case "CRITICAL":
-		statusStyle = criticalStyle
-	default:
-		statusStyle = lipgloss.NewStyle().Foreground(crtGray)
-	}
-	
-	statusText := statusStyle.Render(state.ContainmentStatus)
-	
-	// Progress bars
-	anomalyBar := m.createProgressBar(state.AnomalyLevel, 100, 20, "█", "░")
-	sanityBar := m.createProgressBar(state.ResearcherSanity, 100, 20, "█", "░")
-	
-	statusContent := fmt.Sprintf(
-		"Status: %s | Branch: %s | Anomaly: [%s] %d%% | Sanity: [%s] %d%%",
-		statusText,
-		state.CurrentBranch,
-		anomalyBar, state.AnomalyLevel,
-		sanityBar, state.ResearcherSanity,
-	)
-	
-	return statusBarStyle.Render(statusContent)
-}
+// renderStatusBar renders the status bar - unused, TUI on hold
+// func (m Model) renderStatusBar() string {
+// 	if !m.gameStarted {
+// 		return ""
+// 	}
+// 	
+// 	state := m.engine.State
+// 	
+// 	// Containment status with appropriate color
+// 	var statusStyle lipgloss.Style
+// 	switch state.ContainmentStatus {
+// 	case "SECURE":
+// 		statusStyle = secureStyle
+// 	case "BREACH":
+// 		statusStyle = breachStyle
+// 	case "CRITICAL":
+// 		statusStyle = criticalStyle
+// 	default:
+// 		statusStyle = lipgloss.NewStyle().Foreground(crtGray)
+// 	}
+// 	
+// 	statusText := statusStyle.Render(state.ContainmentStatus)
+// 	
+// 	// Progress bars
+// 	anomalyBar := m.createProgressBar(state.AnomalyLevel, 100, 20, "█", "░")
+// 	sanityBar := m.createProgressBar(state.ResearcherSanity, 100, 20, "█", "░")
+// 	
+// 	statusContent := fmt.Sprintf(
+// 		"Status: %s | Branch: %s | Anomaly: [%s] %d%% | Sanity: [%s] %d%%",
+// 		statusText,
+// 		state.CurrentBranch,
+// 		anomalyBar, state.AnomalyLevel,
+// 		sanityBar, state.ResearcherSanity,
+// 	)
+// 	
+// 	return statusBarStyle.Render(statusContent)
+// }
 
-func (m Model) renderLevelInfo() string {
-	if m.currentLevel == nil {
-		return ""
-	}
-	
-	levelStyle := lipgloss.NewStyle().
-		Border(lipgloss.NormalBorder()).
-		BorderForeground(crtAmber).
-		Padding(1).
-		Margin(1, 0)
-	
-	content := fmt.Sprintf("LEVEL %d: %s\nItem #: %s | Class: %s\n\n%s",
-		m.currentLevel.ID,
-		m.currentLevel.Title,
-		m.currentLevel.SCPNumber,
-		m.currentLevel.ObjectClass,
-		m.currentLevel.Objective,
-	)
-	
-	return levelStyle.Render(content)
-}
+// renderLevelInfo renders level information - unused, TUI on hold
+// func (m Model) renderLevelInfo() string {
+// 	if m.currentLevel == nil {
+// 		return ""
+// 	}
+// 	
+// 	levelStyle := lipgloss.NewStyle().
+// 		Border(lipgloss.NormalBorder()).
+// 		BorderForeground(crtAmber).
+// 		Padding(1).
+// 		Margin(1, 0)
+// 	
+// 	content := fmt.Sprintf("LEVEL %d: %s\nItem #: %s | Class: %s\n\n%s",
+// 		m.currentLevel.ID,
+// 		m.currentLevel.Title,
+// 		m.currentLevel.SCPNumber,
+// 		m.currentLevel.ObjectClass,
+// 		m.currentLevel.Objective,
+// 	)
+// 	
+// 	return levelStyle.Render(content)
+// }
 
-func (m Model) renderPrompt() string {
-	var promptText string
-	if m.gameStarted && m.engine.State.IsInitialized {
-		promptText = fmt.Sprintf("[SCP-████:%s] $ ", m.engine.State.CurrentBranch)
-	} else {
-		promptText = "[SCP-████] $ "
-	}
-	
-	prompt := promptStyle.Render(promptText)
-	input := inputLineStyle.Render(m.input + "█") // Add cursor
-	
-	return lipgloss.JoinHorizontal(lipgloss.Top, prompt, input)
-}
+// renderPrompt renders the command prompt - unused, TUI on hold
+// func (m Model) renderPrompt() string {
+// 	var promptText string
+// 	if m.gameStarted && m.engine.State.IsInitialized {
+// 		promptText = fmt.Sprintf("[SCP-████:%s] $ ", m.engine.State.CurrentBranch)
+// 	} else {
+// 		promptText = "[SCP-████] $ "
+// 	}
+// 	
+// 	prompt := promptStyle.Render(promptText)
+// 	input := inputLineStyle.Render(m.input + "█") // Add cursor
+// 	
+// 	return lipgloss.JoinHorizontal(lipgloss.Top, prompt, input)
+// }
 
-func (m Model) renderHelp() string {
-	helpContent := `FOUNDATION COMMAND REFERENCE:
-─────────────────────────────
-help                    Display this help message
-start                   Begin containment protocols  
-status                  Check containment status
-git init                Initialize containment repository
-git add <file>          Stage files for containment
-git commit -m "msg"     Secure files in containment
-git status              View repository status
-git branch [name]       Create or list containment branches
-git checkout <branch>   Switch containment branches
-clear                   Clear output history
-quit                    Exit containment protocols
+// renderHelp renders help information - unused, TUI on hold
+// func (m Model) renderHelp() string {
+// 	helpContent := `FOUNDATION COMMAND REFERENCE:
+// ─────────────────────────────
+// help                    Display this help message
+// start                   Begin containment protocols  
+// status                  Check containment status
+// git init                Initialize containment repository
+// git add <file>          Stage files for containment
+// git commit -m "msg"     Secure files in containment
+// git status              View repository status
+// git branch [name]       Create or list containment branches
+// git checkout <branch>   Switch containment branches
+// clear                   Clear output history
+// quit                    Exit containment protocols
+// 
+// CONTROLS:
+// ─────────
+// Ctrl+H                  Toggle this help
+// Ctrl+C                  Emergency exit (main menu only)
+// Enter                   Execute command`
+// 	
+// 	crtHelpStyle := lipgloss.NewStyle().
+// 		Border(lipgloss.DoubleBorder()).
+// 		BorderForeground(crtBlue).
+// 		Padding(1).
+// 		Foreground(crtGreen).
+// 		Background(crtBackground)
+// 	
+// 	return crtHelpStyle.Render(helpContent)
+// }
 
-CONTROLS:
-─────────
-Ctrl+H                  Toggle this help
-Ctrl+C                  Emergency exit (main menu only)
-Enter                   Execute command`
-	
-	crtHelpStyle := lipgloss.NewStyle().
-		Border(lipgloss.DoubleBorder()).
-		BorderForeground(crtBlue).
-		Padding(1).
-		Foreground(crtGreen).
-		Background(crtBackground)
-	
-	return crtHelpStyle.Render(helpContent)
-}
-
-func (m Model) createProgressBar(current, max, width int, filled, empty string) string {
-	percentage := float64(current) / float64(max)
-	filledCount := int(percentage * float64(width))
-	emptyCount := width - filledCount
-	
-	return strings.Repeat(filled, filledCount) + strings.Repeat(empty, emptyCount)
-}
+// createProgressBar creates a generic progress bar - unused, TUI on hold
+// func (m Model) createProgressBar(current, max, width int, filled, empty string) string {
+// 	percentage := float64(current) / float64(max)
+// 	filledCount := int(percentage * float64(width))
+// 	emptyCount := width - filledCount
+// 	
+// 	return strings.Repeat(filled, filledCount) + strings.Repeat(empty, emptyCount)
+// }
 
 func (m Model) formatGameStatus() string {
 	state := m.engine.State

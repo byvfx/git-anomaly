@@ -85,7 +85,11 @@ func runClassicGame() {
 		fmt.Printf("Error setting up readline: %v\n", err)
 		os.Exit(1)
 	}
-	defer rl.Close()
+	defer func() {
+		if err := rl.Close(); err != nil {
+			fmt.Printf("Error closing readline: %v\n", err)
+		}
+	}()
 	
 	// Main game loop
 	gameStarted := false

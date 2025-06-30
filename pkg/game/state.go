@@ -20,6 +20,10 @@ type GameState struct {
 	Commits     []Commit
 	CommitGraph map[string][]string // commit -> parents
 
+	// Git config
+	ConfigName  string
+	ConfigEmail string
+
 	// SCP-specific state
 	AnomalyLevel      int    // 0-100, increases with mistakes
 	ResearcherSanity  int    // 0-100, maintained with bubble tea

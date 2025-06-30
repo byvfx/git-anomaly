@@ -86,7 +86,11 @@ func (gs *GameState) UpdateContainmentStatus() {
 
 // IncreaseAnomaly increases the anomaly level and updates containment status
 func (gs *GameState) IncreaseAnomaly(delta int) {
-	gs.AnomalyLevel += delta
+	increase := int(float64(100-gs.AnomalyLevel) * 0.25)
+	if increase < delta {
+		increase = delta
+	}
+	gs.AnomalyLevel += increase
 	if gs.AnomalyLevel > 100 {
 		gs.AnomalyLevel = 100
 	}

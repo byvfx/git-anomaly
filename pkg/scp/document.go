@@ -62,7 +62,6 @@ TIMESTAMP: %s
 ANOMALY DETECTED: %s
 
 RECOMMENDED ACTION: Review containment procedures and retry operation.
-RESEARCHER WELLNESS CHECK: Bubble tea break recommended.
 
 STATUS: AWAITING RESOLUTION
 

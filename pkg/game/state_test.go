@@ -60,8 +60,8 @@ func TestIncreaseAnomaly(t *testing.T) {
 	state := NewGameState()
 	
 	state.IncreaseAnomaly(10)
-	if state.AnomalyLevel != 10 {
-		t.Errorf("Expected anomaly level 10, got %d", state.AnomalyLevel)
+	if state.AnomalyLevel != 25 {
+		t.Errorf("Expected anomaly level 25, got %d", state.AnomalyLevel)
 	}
 	
 	// Test max cap

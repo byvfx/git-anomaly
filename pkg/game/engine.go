@@ -99,7 +99,7 @@ func (e *Engine) ProcessCommand(input string) CommandResult {
 			Success:      false,
 			Message:      fmt.Sprintf("git: '%s' is not a git command", gitCmd),
 			SCPEffect:    "🔴 ERROR: Unknown containment protocol",
-			AnomalyDelta: 1,
+			AnomalyDelta: 5,
 		}
 	}
 	
@@ -146,6 +146,7 @@ func (e *Engine) ProcessCommand(input string) CommandResult {
 			SCPEffect: "✓ Researcher status: Optimal",
 		}
 	default:
+		e.State.IncreaseAnomaly(1)
 		return CommandResult{
 			Success:      false,
 			Message:      fmt.Sprintf("Command not found: %s", parts[0]),

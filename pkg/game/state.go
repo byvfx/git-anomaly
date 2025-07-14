@@ -26,7 +26,6 @@ type GameState struct {
 
 	// SCP-specific state
 	AnomalyLevel      int    // 0-100, increases with mistakes
-	ResearcherSanity  int    // 0-100, maintained with bubble tea
 	ContainmentStatus string // "SECURE", "BREACH", "CRITICAL"
 
 	// Progress tracking
@@ -64,7 +63,6 @@ func NewGameState() *GameState {
 		Commits:           []Commit{},
 		CommitGraph:       make(map[string][]string),
 		AnomalyLevel:      0,
-		ResearcherSanity:  100,
 		ContainmentStatus: "SECURE",
 		CurrentLevel:      1,
 		CompletedLevels:   []int{},
@@ -97,18 +95,3 @@ func (gs *GameState) IncreaseAnomaly(delta int) {
 	gs.UpdateContainmentStatus()
 }
 
-// IncreaseSanity increases researcher sanity (e.g., after bubble tea)
-func (gs *GameState) IncreaseSanity(delta int) {
-	gs.ResearcherSanity += delta
-	if gs.ResearcherSanity > 100 {
-		gs.ResearcherSanity = 100
-	}
-}
-
-// DecreaseSanity decreases researcher sanity
-func (gs *GameState) DecreaseSanity(delta int) {
-	gs.ResearcherSanity -= delta
-	if gs.ResearcherSanity < 0 {
-		gs.ResearcherSanity = 0
-	}
-}

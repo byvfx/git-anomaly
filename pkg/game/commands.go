@@ -20,7 +20,6 @@ type CommandResult struct {
 	Message      string
 	SCPEffect    string // Special SCP-themed message
 	AnomalyDelta int    // Change in anomaly level
-	SanityDelta  int    // Change in researcher sanity
 }
 
 // CommandRegistry maps command names to their implementations
@@ -61,7 +60,6 @@ func (c *ConfigCommand) Execute(args []string, state *GameState) CommandResult {
 			Success:     true,
 			Message:     fmt.Sprintf("Configured user.name: %s", value),
 			SCPEffect:   fmt.Sprintf("✅ Researcher identity confirmed: Dr. %s", value),
-			SanityDelta: 1,
 		}
 	case "user.email":
 		state.ConfigEmail = value
@@ -69,7 +67,6 @@ func (c *ConfigCommand) Execute(args []string, state *GameState) CommandResult {
 			Success:     true,
 			Message:     fmt.Sprintf("Configured user.email: %s", value),
 			SCPEffect:   "✅ Foundation contact protocol established",
-			SanityDelta: 1,
 		}
 	default:
 		return CommandResult{
@@ -99,7 +96,6 @@ func (c *InitCommand) Execute(args []string, state *GameState) CommandResult {
 			Message:      "Repository already initialized",
 			SCPEffect:    "⚠️  CONTAINMENT BREACH: Attempting to re-initialize secure repository",
 			AnomalyDelta: 5,
-			SanityDelta:  -3, // Stress from making mistakes
 		}
 	}
 	
@@ -111,7 +107,6 @@ func (c *InitCommand) Execute(args []string, state *GameState) CommandResult {
 		Success:     true,
 		Message:     "Initialized empty Git repository",
 		SCPEffect:   "✅ CONTAINMENT ESTABLISHED: Digital anomaly repository secured",
-		SanityDelta: 2,
 	}
 }
 
@@ -133,7 +128,6 @@ func (c *AddCommand) Execute(args []string, state *GameState) CommandResult {
 			Message:      "Repository not initialized",
 			SCPEffect:    "🔴 ERROR: Cannot stage files without containment protocols",
 			AnomalyDelta: 3,
-			SanityDelta:  -2, // Confusion and stress
 		}
 	}
 	
@@ -143,7 +137,6 @@ func (c *AddCommand) Execute(args []string, state *GameState) CommandResult {
 			Message:     "Nothing specified, nothing added",
 			SCPEffect:   "⚠️  WARNING: Specify files for containment",
 			AnomalyDelta: 1,
-			SanityDelta: -1, // Minor frustration
 		}
 	}
 	
@@ -152,7 +145,6 @@ func (c *AddCommand) Execute(args []string, state *GameState) CommandResult {
 	var notFoundFiles []string
 	var anomalyFilesAdded int
 	totalAnomalyDelta := 0
-	totalSanityDelta := 0
 	
 	for _, arg := range args {
 		// Handle "git add ." or "git add *"
@@ -167,7 +159,6 @@ func (c *AddCommand) Execute(args []string, state *GameState) CommandResult {
 					if strings.Contains(filename, "anomaly") {
 						anomalyFilesAdded++
 						totalAnomalyDelta += 2
-						totalSanityDelta -= 1
 					}
 				}
 			}
@@ -185,7 +176,6 @@ func (c *AddCommand) Execute(args []string, state *GameState) CommandResult {
 				if strings.Contains(arg, "anomaly") {
 					anomalyFilesAdded++
 					totalAnomalyDelta += 2
-					totalSanityDelta -= 1
 				}
 			}
 		} else {
@@ -201,7 +191,6 @@ func (c *AddCommand) Execute(args []string, state *GameState) CommandResult {
 			Message:      fmt.Sprintf("pathspec '%s' did not match any files", strings.Join(notFoundFiles, "', '")),
 			SCPEffect:    "🔴 ERROR: Files not found in containment area",
 			AnomalyDelta: len(notFoundFiles),
-			SanityDelta:  -len(notFoundFiles), // Frustration from typos
 		}
 	}
 	
@@ -233,17 +222,12 @@ func (c *AddCommand) Execute(args []string, state *GameState) CommandResult {
 		scpEffect = fmt.Sprintf("✅ %d files staged for containment", len(addedFiles))
 	}
 	
-	// Calculate final sanity delta (positive if no anomaly files)
-	if anomalyFilesAdded == 0 && len(notFoundFiles) == 0 {
-		totalSanityDelta = 1
-	}
 	
 	return CommandResult{
 		Success:      len(notFoundFiles) == 0,
 		Message:      message.String(),
 		SCPEffect:    scpEffect,
 		AnomalyDelta: totalAnomalyDelta,
-		SanityDelta:  totalSanityDelta,
 	}
 }
 
@@ -265,7 +249,6 @@ func (c *CommitCommand) Execute(args []string, state *GameState) CommandResult {
 			Message:      "Repository not initialized",
 			SCPEffect:    "🔴 ERROR: Cannot commit without containment protocols",
 			AnomalyDelta: 3,
-			SanityDelta:  -2, // Major confusion
 		}
 	}
 	
@@ -275,7 +258,6 @@ func (c *CommitCommand) Execute(args []string, state *GameState) CommandResult {
 			Message:     "nothing to commit, working tree clean",
 			SCPEffect:   "⚠️  No files staged for containment",
 			AnomalyDelta: 1,
-			SanityDelta: -1, // Slight frustration
 		}
 	}
 	
@@ -342,7 +324,6 @@ func (c *CommitCommand) Execute(args []string, state *GameState) CommandResult {
 		Success:     true,
 		Message:     fmt.Sprintf("[%s %s] %s\n %d files changed", state.CurrentBranch, commitID[:7], message, fileCount),
 		SCPEffect:   fmt.Sprintf("✅ CONTAINMENT SUCCESSFUL: %d anomalies secured with ID %s", fileCount, commitID[:7]),
-		SanityDelta: 3,
 	}
 }
 
@@ -665,7 +646,6 @@ func (c *BranchCommand) Execute(args []string, state *GameState) CommandResult {
 		Success:     true,
 		Message:     fmt.Sprintf("Created branch '%s'", branchName),
 		SCPEffect:   fmt.Sprintf("✅ New containment branch '%s' established", branchName),
-		SanityDelta: 1,
 	}
 }
 
@@ -712,7 +692,6 @@ func (c *CheckoutCommand) Execute(args []string, state *GameState) CommandResult
 				Success:     true,
 				Message:     fmt.Sprintf("Switched to a new branch '%s'", branchName),
 				SCPEffect:   fmt.Sprintf("✅ New containment branch '%s' created and activated", branchName),
-				SanityDelta: 2,
 			}
 		}
 		
@@ -730,7 +709,6 @@ func (c *CheckoutCommand) Execute(args []string, state *GameState) CommandResult
 		Success:     true,
 		Message:     fmt.Sprintf("Switched to branch '%s'", branchName),
 		SCPEffect:   fmt.Sprintf("✅ Containment branch switched to '%s'", branchName),
-		SanityDelta: 1,
 	}
 }
 
@@ -793,7 +771,6 @@ func (c *SwitchCommand) Execute(args []string, state *GameState) CommandResult {
 			Success:     true,
 			Message:     fmt.Sprintf("Switched to a new branch '%s'", branchName),
 			SCPEffect:   fmt.Sprintf("✅ New containment branch '%s' created and activated", branchName),
-			SanityDelta: 2,
 		}
 	}
 	
@@ -815,7 +792,6 @@ func (c *SwitchCommand) Execute(args []string, state *GameState) CommandResult {
 		Success:     true,
 		Message:     fmt.Sprintf("Switched to branch '%s'", branchName),
 		SCPEffect:   fmt.Sprintf("✅ Containment branch switched to '%s'", branchName),
-		SanityDelta: 1,
 	}
 }
 
@@ -926,7 +902,6 @@ func (c *MergeCommand) Execute(args []string, state *GameState) CommandResult {
 		Success:     true,
 		Message:     fmt.Sprintf("Merged %d commits from '%s' into %s", mergedCount, sourceBranch, state.CurrentBranch),
 		SCPEffect:   fmt.Sprintf("✅ Containment strategies merged. %d protocols integrated.", mergedCount),
-		SanityDelta: 3,
 	}
 }
 

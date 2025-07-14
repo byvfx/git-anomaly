@@ -5,16 +5,12 @@ import (
 	"os"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/chzyer/readline"
 	"github.com/spf13/cobra"
 	"github.com/byvfx/git-anomaly/pkg/game"
 	"github.com/byvfx/git-anomaly/pkg/ui"
 )
 
-var (
-	useTUI bool
-)
 
 var rootCmd = &cobra.Command{
 	Use:   "scp-git",
@@ -35,40 +31,14 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().BoolVarP(&useTUI, "tui", "t", true, "Use the modern TUI interface (default)")
-	rootCmd.Flags().BoolP("classic", "c", false, "Use the classic CLI interface")
+	// No flags needed - classic mode is now the default
 }
 
 func runGame(cmd *cobra.Command, args []string) {
-	// Check if classic mode is requested
-	classic, _ := cmd.Flags().GetBool("classic")
-	if classic {
-		useTUI = false
-	}
-	
-	if useTUI {
-		// Use modern Bubble Tea TUI
-		runTUIGame()
-	} else {
-		// Use classic CLI interface
-		runClassicGame()
-	}
+	// Always use classic CLI interface
+	runClassicGame()
 }
 
-func runTUIGame() {
-	model := ui.NewModel()
-	
-	program := tea.NewProgram(
-		model,
-		tea.WithAltScreen(),
-		tea.WithMouseCellMotion(),
-	)
-	
-	if _, err := program.Run(); err != nil {
-		fmt.Printf("Error running TUI: %v\n", err)
-		os.Exit(1)
-	}
-}
 
 func runClassicGame() {
 	// Initialize game components
@@ -181,12 +151,6 @@ func runClassicGame() {
 			return
 		}
 		
-		if engine.State.ResearcherSanity <= 0 {
-			terminal.DisplayError("RESEARCHER COMPROMISED!")
-			fmt.Println("\nYou have been affected by the anomaly's influence.")
-			fmt.Println("Report to Medical immediately.")
-			return
-		}
 		
 		// Check for level completion
 		if engine.IsLevelComplete() {
@@ -220,7 +184,7 @@ func runClassicGame() {
 		}
 		
 		// Show status if something significant changed
-		if result.AnomalyDelta != 0 || result.SanityDelta != 0 {
+		if result.AnomalyDelta != 0 {
 			fmt.Println()
 			terminal.DisplayGameStatus(engine.State)
 		}
@@ -239,7 +203,6 @@ func setupReadline(engine *game.Engine) (*readline.Instance, error) {
 		readline.PcItem("briefing"),
 		readline.PcItem("objective"),
 		readline.PcItem("objectives"),
-		readline.PcItem("breathe"),
 		readline.PcItem("clear"),
 		readline.PcItem("quit"),
 		readline.PcItem("exit"),

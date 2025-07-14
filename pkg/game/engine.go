@@ -68,19 +68,6 @@ func (e *Engine) ProcessCommand(input string) CommandResult {
 			// Update game state based on result
 			e.State.IncreaseAnomaly(result.AnomalyDelta)
 			
-			// Handle sanity changes (can be positive or negative)
-			if result.SanityDelta > 0 {
-				e.State.IncreaseSanity(result.SanityDelta)
-			} else if result.SanityDelta < 0 {
-				e.State.DecreaseSanity(-result.SanityDelta) // Convert to positive for DecreaseSanity
-			}
-			
-			// Additional sanity drain when anomaly levels are high
-			if e.State.AnomalyLevel >= 50 {
-				e.State.DecreaseSanity(1) // Stress from high anomaly environment
-				result.SCPEffect += "\n🔴 High anomaly levels affecting researcher mental state"
-			}
-			
 			// Check for level completion
 			if e.CurrentLevel != nil {
 				if completed, msg := e.CurrentLevel.ValidateFunc(e.State); completed {
@@ -129,22 +116,6 @@ func (e *Engine) ProcessCommand(input string) CommandResult {
 			Message:   "", // UI will display the level info
 			SCPEffect: "📋 Displaying current containment briefing",
 		}
-	case "breathe", "rest", "pause":
-		// Simple sanity recovery command
-		if e.State.ResearcherSanity < 100 {
-			e.State.IncreaseSanity(5)
-			return CommandResult{
-				Success:     true,
-				Message:     "You take a moment to collect yourself.",
-				SCPEffect:   "🧘 The facility's environmental systems provide a calming atmosphere.",
-				SanityDelta: 0, // Already applied above
-			}
-		}
-		return CommandResult{
-			Success:   true,
-			Message:   "You're already at peak mental clarity.",
-			SCPEffect: "✓ Researcher status: Optimal",
-		}
 	default:
 		e.State.IncreaseAnomaly(1)
 		return CommandResult{
@@ -152,7 +123,6 @@ func (e *Engine) ProcessCommand(input string) CommandResult {
 			Message:      fmt.Sprintf("Command not found: %s", parts[0]),
 			SCPEffect:    "⚠️  Invalid Foundation protocol",
 			AnomalyDelta: 1,
-			SanityDelta:  -2, // Confusion from unknown commands
 		}
 	}
 }

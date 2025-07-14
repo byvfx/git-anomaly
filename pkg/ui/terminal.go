@@ -65,8 +65,8 @@ func (t *Terminal) DisplayGameStatus(state *game.GameState) {
 	statusColor.Printf("CONTAINMENT STATUS: %s", state.ContainmentStatus)
 	
 	// Current stats
-	fmt.Printf(" | Branch: %s | Anomaly: %d%% | Sanity: %d%%\n", 
-		state.CurrentBranch, state.AnomalyLevel, state.ResearcherSanity)
+	fmt.Printf(" | Branch: %s | Anomaly: %d%%\n", 
+		state.CurrentBranch, state.AnomalyLevel)
 	
 	// Working directory status
 	if len(state.StagingArea) > 0 {
@@ -143,16 +143,9 @@ func (t *Terminal) DisplayCommandResult(result game.CommandResult) {
 	}
 	
 	// Display stat changes
-	if result.AnomalyDelta != 0 || result.SanityDelta != 0 {
+	if result.AnomalyDelta != 0 {
 		fmt.Println()
-		if result.AnomalyDelta > 0 {
-			SCPRed.Printf("⚠️  Anomaly Level +%d%%\n", result.AnomalyDelta)
-		}
-		if result.SanityDelta > 0 {
-			SCPGreen.Printf("✓ Researcher Sanity +%d%%\n", result.SanityDelta)
-		} else if result.SanityDelta < 0 {
-			SCPOrange.Printf("⚠️  Researcher Sanity %d%%\n", result.SanityDelta)
-		}
+		SCPRed.Printf("⚠️  Anomaly Level +%d%%\n", result.AnomalyDelta)
 	}
 }
 
@@ -179,7 +172,6 @@ func (t *Terminal) DisplayHelp() {
 		{"start", "Begin containment protocols"},
 		{"status", "Check containment status"},
 		{"brief/briefing", "Re-display current level briefing"},
-		{"breathe", "Take a moment to recover sanity"},
 		{"git init", "Initialize containment repository"},
 		{"git config <key> <value>", "Configure researcher identity"},
 		{"git add <file>", "Stage files for containment"},

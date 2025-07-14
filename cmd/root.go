@@ -5,12 +5,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/chzyer/readline"
-	"github.com/spf13/cobra"
 	"github.com/byvfx/git-anomaly/pkg/game"
 	"github.com/byvfx/git-anomaly/pkg/ui"
+	"github.com/chzyer/readline"
+	"github.com/spf13/cobra"
 )
-
 
 var rootCmd = &cobra.Command{
 	Use:   "scp-git",
@@ -39,16 +38,15 @@ func runGame(cmd *cobra.Command, args []string) {
 	runClassicGame()
 }
 
-
 func runClassicGame() {
 	// Initialize game components
 	engine := game.NewEngine()
 	terminal := ui.NewTerminal()
-	
+
 	// Display welcome screen
 	terminal.ClearScreen()
 	terminal.DisplayWelcome()
-	
+
 	// Configure readline
 	rl, err := setupReadline(engine)
 	if err != nil {
@@ -60,10 +58,10 @@ func runClassicGame() {
 			fmt.Printf("Error closing readline: %v\n", err)
 		}
 	}()
-	
+
 	// Main game loop
 	gameStarted := false
-	
+
 	for {
 		// Set prompt
 		prompt := "[SCP-████] $ "
@@ -71,36 +69,36 @@ func runClassicGame() {
 			prompt = fmt.Sprintf("[SCP-████:%s] $ ", engine.State.CurrentBranch)
 		}
 		rl.SetPrompt(prompt)
-		
+
 		// Read user input
 		line, err := rl.Readline()
 		if err != nil { // io.EOF or interrupt
 			break
 		}
-		
+
 		input := strings.TrimSpace(line)
 		if input == "" {
 			continue
 		}
-		
+
 		// Handle meta commands
 		switch input {
 		case "quit", "exit", "q":
 			fmt.Println("\nExiting containment protocols...")
 			fmt.Println("Progress has been saved. The anomaly remains contained.")
 			return
-			
+
 		case "help", "h", "?":
 			terminal.DisplayHelp()
 			continue
-			
+
 		case "clear", "cls":
 			terminal.ClearScreen()
 			if gameStarted {
 				terminal.DisplayGameStatus(engine.State)
 			}
 			continue
-			
+
 		case "start":
 			if !gameStarted {
 				gameStarted = true
@@ -115,7 +113,7 @@ func runClassicGame() {
 				terminal.DisplayError("Game already in progress")
 			}
 			continue
-			
+
 		case "status":
 			if gameStarted {
 				terminal.DisplayGameStatus(engine.State)
@@ -123,7 +121,7 @@ func runClassicGame() {
 				terminal.DisplayError("No game in progress. Type 'start' to begin.")
 			}
 			continue
-			
+
 		case "brief", "briefing", "objective", "objectives":
 			if gameStarted && engine.CurrentLevel != nil {
 				terminal.DisplayLevelIntro(engine.CurrentLevel)
@@ -132,17 +130,17 @@ func runClassicGame() {
 			}
 			continue
 		}
-		
+
 		// Process game commands
 		if !gameStarted {
 			terminal.DisplayError("Type 'start' to begin containment protocols")
 			continue
 		}
-		
+
 		// Execute command
 		result := engine.ProcessCommand(input)
 		terminal.DisplayCommandResult(result)
-		
+
 		// Check for critical states
 		if engine.State.AnomalyLevel >= 100 {
 			terminal.DisplayError("CRITICAL CONTAINMENT BREACH!")
@@ -150,14 +148,13 @@ func runClassicGame() {
 			fmt.Println("\nGame Over. The anomaly has escaped containment.")
 			return
 		}
-		
-		
+
 		// Check for level completion
 		if engine.IsLevelComplete() {
 			fmt.Println()
 			terminal.DisplaySuccess("LEVEL COMPLETE!")
 			fmt.Printf("Score: %d\n", engine.State.Score)
-			
+
 			nextLevel := engine.GetNextLevel()
 			if nextLevel > 0 && nextLevel <= 3 {
 				rl.SetPrompt(fmt.Sprintf("\nProceed to Level %d? (y/n): ", nextLevel))
@@ -182,7 +179,7 @@ func runClassicGame() {
 				return
 			}
 		}
-		
+
 		// Show status if something significant changed
 		if result.AnomalyDelta != 0 {
 			fmt.Println()
@@ -206,7 +203,7 @@ func setupReadline(engine *game.Engine) (*readline.Instance, error) {
 		readline.PcItem("clear"),
 		readline.PcItem("quit"),
 		readline.PcItem("exit"),
-		
+
 		// Git commands
 		readline.PcItem("git",
 			readline.PcItem("config",
@@ -220,7 +217,7 @@ func setupReadline(engine *game.Engine) (*readline.Instance, error) {
 					if engine.State == nil || engine.State.WorkingDir == nil {
 						return []string{}
 					}
-					
+
 					var files []string
 					for filename := range engine.State.WorkingDir {
 						files = append(files, filename)
@@ -247,7 +244,7 @@ func setupReadline(engine *game.Engine) (*readline.Instance, error) {
 					if engine.State == nil || engine.State.Branches == nil {
 						return []string{}
 					}
-					
+
 					var branches []string
 					for branch := range engine.State.Branches {
 						branches = append(branches, branch)
@@ -263,7 +260,7 @@ func setupReadline(engine *game.Engine) (*readline.Instance, error) {
 					if engine.State == nil || engine.State.Branches == nil {
 						return []string{}
 					}
-					
+
 					var branches []string
 					for branch := range engine.State.Branches {
 						branches = append(branches, branch)
@@ -277,7 +274,7 @@ func setupReadline(engine *game.Engine) (*readline.Instance, error) {
 					if engine.State == nil || engine.State.Branches == nil {
 						return []string{}
 					}
-					
+
 					var branches []string
 					for branch := range engine.State.Branches {
 						if branch != engine.State.CurrentBranch {
@@ -289,7 +286,7 @@ func setupReadline(engine *game.Engine) (*readline.Instance, error) {
 			),
 		),
 	)
-	
+
 	// Configure readline
 	config := &readline.Config{
 		Prompt:              "[SCP-████] $ ",
@@ -300,7 +297,7 @@ func setupReadline(engine *game.Engine) (*readline.Instance, error) {
 		HistorySearchFold:   true,
 		FuncFilterInputRune: filterInput,
 	}
-	
+
 	return readline.NewEx(config)
 }
 

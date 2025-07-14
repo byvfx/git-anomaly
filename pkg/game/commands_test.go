@@ -8,7 +8,7 @@ import (
 func TestInitCommand(t *testing.T) {
 	state := NewGameState()
 	cmd := &InitCommand{}
-	
+
 	// Test successful init
 	result := cmd.Execute([]string{}, state)
 	if !result.Success {
@@ -20,10 +20,8 @@ func TestInitCommand(t *testing.T) {
 	if state.CurrentBranch != "main" {
 		t.Errorf("Expected branch 'main', got '%s'", state.CurrentBranch)
 	}
-	if result.SanityDelta <= 0 {
-		t.Error("Successful init should increase sanity")
-	}
-	
+	// Successful init command completed
+
 	// Test init on already initialized repo
 	result = cmd.Execute([]string{}, state)
 	if result.Success {
@@ -41,16 +39,16 @@ func TestAddCommand(t *testing.T) {
 		Content: "test content",
 		Hash:    "abc123",
 	}
-	
+
 	cmd := &AddCommand{}
-	
+
 	// Test add without init
 	uninitState := NewGameState()
 	result := cmd.Execute([]string{"test.txt"}, uninitState)
 	if result.Success {
 		t.Error("Add should fail without initialized repo")
 	}
-	
+
 	// Test successful add
 	result = cmd.Execute([]string{"test.txt"}, state)
 	if !result.Success {
@@ -59,7 +57,7 @@ func TestAddCommand(t *testing.T) {
 	if _, exists := state.StagingArea["test.txt"]; !exists {
 		t.Error("File should be in staging area after add")
 	}
-	
+
 	// Test add non-existent file
 	result = cmd.Execute([]string{"nonexistent.txt"}, state)
 	if result.Success {
@@ -72,16 +70,16 @@ func TestCommitCommand(t *testing.T) {
 	state.IsInitialized = true
 	state.CurrentBranch = "main"
 	state.Branches["main"] = []string{}
-	
+
 	// Stage a file
 	state.StagingArea["test.txt"] = FileState{
 		Content: "test",
 		Hash:    "abc",
 		Staged:  true,
 	}
-	
+
 	cmd := &CommitCommand{}
-	
+
 	// Test commit with message
 	result := cmd.Execute([]string{"-m", "Initial commit"}, state)
 	if !result.Success {
@@ -93,7 +91,7 @@ func TestCommitCommand(t *testing.T) {
 	if len(state.StagingArea) != 0 {
 		t.Error("Staging area should be empty after commit")
 	}
-	
+
 	// Test commit without staged files
 	result = cmd.Execute([]string{"-m", "Empty commit"}, state)
 	if result.Success {
@@ -105,9 +103,9 @@ func TestStatusCommand(t *testing.T) {
 	state := NewGameState()
 	state.IsInitialized = true
 	state.CurrentBranch = "main"
-	
+
 	cmd := &StatusCommand{}
-	
+
 	result := cmd.Execute([]string{}, state)
 	if !result.Success {
 		t.Error("Status command should always succeed on initialized repo")
@@ -122,9 +120,9 @@ func TestBranchCommand(t *testing.T) {
 	state.IsInitialized = true
 	state.CurrentBranch = "main"
 	state.Branches["main"] = []string{}
-	
+
 	cmd := &BranchCommand{}
-	
+
 	// Test creating new branch
 	result := cmd.Execute([]string{"feature"}, state)
 	if !result.Success {
@@ -133,7 +131,7 @@ func TestBranchCommand(t *testing.T) {
 	if _, exists := state.Branches["feature"]; !exists {
 		t.Error("New branch should exist in branches map")
 	}
-	
+
 	// Test creating duplicate branch
 	result = cmd.Execute([]string{"feature"}, state)
 	if result.Success {
@@ -147,9 +145,9 @@ func TestCheckoutCommand(t *testing.T) {
 	state.CurrentBranch = "main"
 	state.Branches["main"] = []string{}
 	state.Branches["feature"] = []string{}
-	
+
 	cmd := &CheckoutCommand{}
-	
+
 	// Test checkout existing branch
 	result := cmd.Execute([]string{"feature"}, state)
 	if !result.Success {
@@ -158,13 +156,13 @@ func TestCheckoutCommand(t *testing.T) {
 	if state.CurrentBranch != "feature" {
 		t.Errorf("Expected current branch 'feature', got '%s'", state.CurrentBranch)
 	}
-	
+
 	// Test checkout non-existent branch
 	result = cmd.Execute([]string{"nonexistent"}, state)
 	if result.Success {
 		t.Error("Checkout should fail for non-existent branch")
 	}
-	
+
 	// Test checkout -b
 	result = cmd.Execute([]string{"-b", "new-branch"}, state)
 	if !result.Success {

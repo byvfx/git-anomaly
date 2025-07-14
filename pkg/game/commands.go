@@ -49,24 +49,24 @@ func (c *ConfigCommand) Execute(args []string, state *GameState) CommandResult {
 			SCPEffect: "⚠️  Researcher identity required for accountability",
 		}
 	}
-	
+
 	key := args[0]
 	value := strings.Join(args[1:], " ")
-	
+
 	switch key {
 	case "user.name":
 		state.ConfigName = value
 		return CommandResult{
-			Success:     true,
-			Message:     fmt.Sprintf("Configured user.name: %s", value),
-			SCPEffect:   fmt.Sprintf("✅ Researcher identity confirmed: Dr. %s", value),
+			Success:   true,
+			Message:   fmt.Sprintf("Configured user.name: %s", value),
+			SCPEffect: fmt.Sprintf("✅ Researcher identity confirmed: Dr. %s", value),
 		}
 	case "user.email":
 		state.ConfigEmail = value
 		return CommandResult{
-			Success:     true,
-			Message:     fmt.Sprintf("Configured user.email: %s", value),
-			SCPEffect:   "✅ Foundation contact protocol established",
+			Success:   true,
+			Message:   fmt.Sprintf("Configured user.email: %s", value),
+			SCPEffect: "✅ Foundation contact protocol established",
 		}
 	default:
 		return CommandResult{
@@ -98,15 +98,15 @@ func (c *InitCommand) Execute(args []string, state *GameState) CommandResult {
 			AnomalyDelta: 5,
 		}
 	}
-	
+
 	state.IsInitialized = true
 	state.CurrentBranch = "main"
 	state.Branches["main"] = []string{}
-	
+
 	return CommandResult{
-		Success:     true,
-		Message:     "Initialized empty Git repository",
-		SCPEffect:   "✅ CONTAINMENT ESTABLISHED: Digital anomaly repository secured",
+		Success:   true,
+		Message:   "Initialized empty Git repository",
+		SCPEffect: "✅ CONTAINMENT ESTABLISHED: Digital anomaly repository secured",
 	}
 }
 
@@ -130,22 +130,22 @@ func (c *AddCommand) Execute(args []string, state *GameState) CommandResult {
 			AnomalyDelta: 3,
 		}
 	}
-	
+
 	if len(args) == 0 {
 		return CommandResult{
-			Success:     false,
-			Message:     "Nothing specified, nothing added",
-			SCPEffect:   "⚠️  WARNING: Specify files for containment",
+			Success:      false,
+			Message:      "Nothing specified, nothing added",
+			SCPEffect:    "⚠️  WARNING: Specify files for containment",
 			AnomalyDelta: 1,
 		}
 	}
-	
+
 	// Process all arguments (supports multiple files)
 	var addedFiles []string
 	var notFoundFiles []string
 	var anomalyFilesAdded int
 	totalAnomalyDelta := 0
-	
+
 	for _, arg := range args {
 		// Handle "git add ." or "git add *"
 		if arg == "." || arg == "*" {
@@ -155,7 +155,7 @@ func (c *AddCommand) Execute(args []string, state *GameState) CommandResult {
 					stagingFile.Staged = true
 					state.StagingArea[filename] = stagingFile
 					addedFiles = append(addedFiles, filename)
-					
+
 					if strings.Contains(filename, "anomaly") {
 						anomalyFilesAdded++
 						totalAnomalyDelta += 2
@@ -164,7 +164,7 @@ func (c *AddCommand) Execute(args []string, state *GameState) CommandResult {
 			}
 			continue
 		}
-		
+
 		// Handle specific file
 		if fileState, exists := state.WorkingDir[arg]; exists {
 			if !fileState.Staged {
@@ -172,7 +172,7 @@ func (c *AddCommand) Execute(args []string, state *GameState) CommandResult {
 				stagingFile.Staged = true
 				state.StagingArea[arg] = stagingFile
 				addedFiles = append(addedFiles, arg)
-				
+
 				if strings.Contains(arg, "anomaly") {
 					anomalyFilesAdded++
 					totalAnomalyDelta += 2
@@ -182,7 +182,7 @@ func (c *AddCommand) Execute(args []string, state *GameState) CommandResult {
 			notFoundFiles = append(notFoundFiles, arg)
 		}
 	}
-	
+
 	// Build response based on what happened
 	if len(notFoundFiles) > 0 && len(addedFiles) == 0 {
 		// All files not found
@@ -193,7 +193,7 @@ func (c *AddCommand) Execute(args []string, state *GameState) CommandResult {
 			AnomalyDelta: len(notFoundFiles),
 		}
 	}
-	
+
 	if len(addedFiles) == 0 {
 		return CommandResult{
 			Success:   true,
@@ -201,7 +201,7 @@ func (c *AddCommand) Execute(args []string, state *GameState) CommandResult {
 			SCPEffect: "✓ All specified files already contained in staging area",
 		}
 	}
-	
+
 	// Build success message
 	var message strings.Builder
 	if len(addedFiles) == 1 {
@@ -209,11 +209,11 @@ func (c *AddCommand) Execute(args []string, state *GameState) CommandResult {
 	} else {
 		message.WriteString(fmt.Sprintf("Added %d files to staging area", len(addedFiles)))
 	}
-	
+
 	if len(notFoundFiles) > 0 {
 		message.WriteString(fmt.Sprintf("\nWarning: pathspec '%s' did not match any files", strings.Join(notFoundFiles, "', '")))
 	}
-	
+
 	// Build SCP effect message
 	var scpEffect string
 	if anomalyFilesAdded > 0 {
@@ -221,8 +221,7 @@ func (c *AddCommand) Execute(args []string, state *GameState) CommandResult {
 	} else {
 		scpEffect = fmt.Sprintf("✅ %d files staged for containment", len(addedFiles))
 	}
-	
-	
+
 	return CommandResult{
 		Success:      len(notFoundFiles) == 0,
 		Message:      message.String(),
@@ -251,16 +250,16 @@ func (c *CommitCommand) Execute(args []string, state *GameState) CommandResult {
 			AnomalyDelta: 3,
 		}
 	}
-	
+
 	if len(state.StagingArea) == 0 {
 		return CommandResult{
-			Success:     false,
-			Message:     "nothing to commit, working tree clean",
-			SCPEffect:   "⚠️  No files staged for containment",
+			Success:      false,
+			Message:      "nothing to commit, working tree clean",
+			SCPEffect:    "⚠️  No files staged for containment",
 			AnomalyDelta: 1,
 		}
 	}
-	
+
 	// Handle -a flag (commit all tracked modified files)
 	if len(args) > 0 && args[0] == "-a" {
 		// Stage all modified files
@@ -282,7 +281,7 @@ func (c *CommitCommand) Execute(args []string, state *GameState) CommandResult {
 		// Remove -a from args for message parsing
 		args = args[1:]
 	}
-	
+
 	// Parse commit message
 	message := "Initial containment"
 	if len(args) >= 2 && args[0] == "-m" {
@@ -290,13 +289,13 @@ func (c *CommitCommand) Execute(args []string, state *GameState) CommandResult {
 	} else if len(args) >= 3 && args[0] == "-a" && args[1] == "-m" {
 		message = strings.Join(args[2:], " ")
 	}
-	
+
 	// Create commit
 	author := "Dr. ████████"
 	if state.ConfigName != "" {
 		author = state.ConfigName
 	}
-	
+
 	commitID := generateCommitID()
 	commit := Commit{
 		ID:        commitID,
@@ -306,24 +305,24 @@ func (c *CommitCommand) Execute(args []string, state *GameState) CommandResult {
 		Files:     make(map[string]string),
 		Branch:    state.CurrentBranch,
 	}
-	
+
 	// Add files to commit
 	for filename, fileState := range state.StagingArea {
 		commit.Files[filename] = fileState.Hash
 	}
-	
+
 	// Update game state
 	state.Commits = append(state.Commits, commit)
 	state.Branches[state.CurrentBranch] = append(state.Branches[state.CurrentBranch], commitID)
-	
+
 	// Clear staging area
 	fileCount := len(state.StagingArea)
 	state.StagingArea = make(map[string]FileState)
-	
+
 	return CommandResult{
-		Success:     true,
-		Message:     fmt.Sprintf("[%s %s] %s\n %d files changed", state.CurrentBranch, commitID[:7], message, fileCount),
-		SCPEffect:   fmt.Sprintf("✅ CONTAINMENT SUCCESSFUL: %d anomalies secured with ID %s", fileCount, commitID[:7]),
+		Success:   true,
+		Message:   fmt.Sprintf("[%s %s] %s\n %d files changed", state.CurrentBranch, commitID[:7], message, fileCount),
+		SCPEffect: fmt.Sprintf("✅ CONTAINMENT SUCCESSFUL: %d anomalies secured with ID %s", fileCount, commitID[:7]),
 	}
 }
 
@@ -347,14 +346,14 @@ func (c *StatusCommand) Execute(args []string, state *GameState) CommandResult {
 			AnomalyDelta: 1,
 		}
 	}
-	
+
 	var status strings.Builder
 	status.WriteString(fmt.Sprintf("On branch %s\n", state.CurrentBranch))
-	
+
 	if len(state.Commits) == 0 {
 		status.WriteString("\nNo commits yet\n")
 	}
-	
+
 	// Check for staged files
 	if len(state.StagingArea) > 0 {
 		status.WriteString("\nChanges to be committed:\n")
@@ -363,7 +362,7 @@ func (c *StatusCommand) Execute(args []string, state *GameState) CommandResult {
 			status.WriteString(fmt.Sprintf("\tnew file:   %s\n", filename))
 		}
 	}
-	
+
 	// Check for unstaged files
 	unstagedCount := 0
 	for _, fileState := range state.WorkingDir {
@@ -371,7 +370,7 @@ func (c *StatusCommand) Execute(args []string, state *GameState) CommandResult {
 			unstagedCount++
 		}
 	}
-	
+
 	if unstagedCount > 0 {
 		status.WriteString("\nUntracked files:\n")
 		status.WriteString("  (use \"git add <file>...\" to include in what will be committed)\n")
@@ -381,11 +380,11 @@ func (c *StatusCommand) Execute(args []string, state *GameState) CommandResult {
 			}
 		}
 	}
-	
+
 	if len(state.StagingArea) == 0 && unstagedCount == 0 {
 		status.WriteString("\nnothing to commit, working tree clean\n")
 	}
-	
+
 	return CommandResult{
 		Success:   true,
 		Message:   status.String(),
@@ -413,13 +412,13 @@ func (c *DiffCommand) Execute(args []string, state *GameState) CommandResult {
 			AnomalyDelta: 1,
 		}
 	}
-	
+
 	var diff strings.Builder
-	
+
 	// Show unstaged changes
 	diff.WriteString("diff --git\n")
 	hasChanges := false
-	
+
 	for filename, workingFile := range state.WorkingDir {
 		// Check if file has been modified since last commit
 		var lastCommittedHash string
@@ -429,7 +428,7 @@ func (c *DiffCommand) Execute(args []string, state *GameState) CommandResult {
 				lastCommittedHash = hash
 			}
 		}
-		
+
 		// If file is new or modified
 		if lastCommittedHash == "" {
 			diff.WriteString(fmt.Sprintf("new file: %s\n", filename))
@@ -446,7 +445,7 @@ func (c *DiffCommand) Execute(args []string, state *GameState) CommandResult {
 			hasChanges = true
 		}
 	}
-	
+
 	if !hasChanges {
 		return CommandResult{
 			Success:   true,
@@ -454,7 +453,7 @@ func (c *DiffCommand) Execute(args []string, state *GameState) CommandResult {
 			SCPEffect: "✓ All files stable - no anomalous activity detected",
 		}
 	}
-	
+
 	return CommandResult{
 		Success:   true,
 		Message:   diff.String(),
@@ -482,7 +481,7 @@ func (c *LogCommand) Execute(args []string, state *GameState) CommandResult {
 			AnomalyDelta: 1,
 		}
 	}
-	
+
 	if len(state.Commits) == 0 {
 		return CommandResult{
 			Success:   true,
@@ -490,12 +489,12 @@ func (c *LogCommand) Execute(args []string, state *GameState) CommandResult {
 			SCPEffect: "📋 No containment history available",
 		}
 	}
-	
+
 	var log strings.Builder
-	
+
 	// Check for -p flag (show patches)
 	showPatch := len(args) > 0 && args[0] == "-p"
-	
+
 	// Show commits in reverse chronological order
 	for i := len(state.Commits) - 1; i >= 0; i-- {
 		commit := state.Commits[i]
@@ -503,7 +502,7 @@ func (c *LogCommand) Execute(args []string, state *GameState) CommandResult {
 		log.WriteString(fmt.Sprintf("Author: %s\n", commit.Author))
 		log.WriteString(fmt.Sprintf("Date:   %s\n", commit.Timestamp.Format("Mon Jan 02 15:04:05 2006")))
 		log.WriteString(fmt.Sprintf("\n    %s\n\n", commit.Message))
-		
+
 		if showPatch {
 			log.WriteString("    Files changed:\n")
 			for filename := range commit.Files {
@@ -512,7 +511,7 @@ func (c *LogCommand) Execute(args []string, state *GameState) CommandResult {
 			log.WriteString("\n")
 		}
 	}
-	
+
 	return CommandResult{
 		Success:   true,
 		Message:   log.String(),
@@ -540,7 +539,7 @@ func (c *ShowCommand) Execute(args []string, state *GameState) CommandResult {
 			AnomalyDelta: 1,
 		}
 	}
-	
+
 	if len(args) == 0 {
 		// Show latest commit by default
 		if len(state.Commits) == 0 {
@@ -550,11 +549,11 @@ func (c *ShowCommand) Execute(args []string, state *GameState) CommandResult {
 				SCPEffect: "📋 No containment records found",
 			}
 		}
-		
+
 		commit := state.Commits[len(state.Commits)-1]
 		return c.showCommit(commit)
 	}
-	
+
 	// Find commit by ID (partial match)
 	commitID := args[0]
 	for _, commit := range state.Commits {
@@ -562,7 +561,7 @@ func (c *ShowCommand) Execute(args []string, state *GameState) CommandResult {
 			return c.showCommit(commit)
 		}
 	}
-	
+
 	return CommandResult{
 		Success:      false,
 		Message:      fmt.Sprintf("fatal: bad object %s", commitID),
@@ -581,7 +580,7 @@ func (c *ShowCommand) showCommit(commit Commit) CommandResult {
 	for filename, hash := range commit.Files {
 		show.WriteString(fmt.Sprintf("    %s [%s]\n", filename, hash))
 	}
-	
+
 	return CommandResult{
 		Success:   true,
 		Message:   show.String(),
@@ -609,7 +608,7 @@ func (c *BranchCommand) Execute(args []string, state *GameState) CommandResult {
 			AnomalyDelta: 1,
 		}
 	}
-	
+
 	// List branches if no args
 	if len(args) == 0 {
 		var branches strings.Builder
@@ -620,14 +619,14 @@ func (c *BranchCommand) Execute(args []string, state *GameState) CommandResult {
 				branches.WriteString(fmt.Sprintf("  %s\n", branch))
 			}
 		}
-		
+
 		return CommandResult{
 			Success:   true,
 			Message:   branches.String(),
 			SCPEffect: "📋 Available containment branches listed",
 		}
 	}
-	
+
 	// Create new branch
 	branchName := args[0]
 	if _, exists := state.Branches[branchName]; exists {
@@ -638,14 +637,14 @@ func (c *BranchCommand) Execute(args []string, state *GameState) CommandResult {
 			AnomalyDelta: 1,
 		}
 	}
-	
+
 	// Copy current branch commits to new branch
 	state.Branches[branchName] = append([]string{}, state.Branches[state.CurrentBranch]...)
-	
+
 	return CommandResult{
-		Success:     true,
-		Message:     fmt.Sprintf("Created branch '%s'", branchName),
-		SCPEffect:   fmt.Sprintf("✅ New containment branch '%s' established", branchName),
+		Success:   true,
+		Message:   fmt.Sprintf("Created branch '%s'", branchName),
+		SCPEffect: fmt.Sprintf("✅ New containment branch '%s' established", branchName),
 	}
 }
 
@@ -669,7 +668,7 @@ func (c *CheckoutCommand) Execute(args []string, state *GameState) CommandResult
 			AnomalyDelta: 1,
 		}
 	}
-	
+
 	if len(args) == 0 {
 		return CommandResult{
 			Success:   false,
@@ -677,9 +676,9 @@ func (c *CheckoutCommand) Execute(args []string, state *GameState) CommandResult
 			SCPEffect: "⚠️  WARNING: Specify target containment branch",
 		}
 	}
-	
+
 	branchName := args[0]
-	
+
 	// Check if branch exists
 	if _, exists := state.Branches[branchName]; !exists {
 		// Handle -b flag for creating and switching
@@ -687,14 +686,14 @@ func (c *CheckoutCommand) Execute(args []string, state *GameState) CommandResult
 			branchName = args[1]
 			state.Branches[branchName] = append([]string{}, state.Branches[state.CurrentBranch]...)
 			state.CurrentBranch = branchName
-			
+
 			return CommandResult{
-				Success:     true,
-				Message:     fmt.Sprintf("Switched to a new branch '%s'", branchName),
-				SCPEffect:   fmt.Sprintf("✅ New containment branch '%s' created and activated", branchName),
+				Success:   true,
+				Message:   fmt.Sprintf("Switched to a new branch '%s'", branchName),
+				SCPEffect: fmt.Sprintf("✅ New containment branch '%s' created and activated", branchName),
 			}
 		}
-		
+
 		return CommandResult{
 			Success:      false,
 			Message:      fmt.Sprintf("error: pathspec '%s' did not match any known branches", branchName),
@@ -702,13 +701,13 @@ func (c *CheckoutCommand) Execute(args []string, state *GameState) CommandResult
 			AnomalyDelta: 2,
 		}
 	}
-	
+
 	state.CurrentBranch = branchName
-	
+
 	return CommandResult{
-		Success:     true,
-		Message:     fmt.Sprintf("Switched to branch '%s'", branchName),
-		SCPEffect:   fmt.Sprintf("✅ Containment branch switched to '%s'", branchName),
+		Success:   true,
+		Message:   fmt.Sprintf("Switched to branch '%s'", branchName),
+		SCPEffect: fmt.Sprintf("✅ Containment branch switched to '%s'", branchName),
 	}
 }
 
@@ -732,7 +731,7 @@ func (c *SwitchCommand) Execute(args []string, state *GameState) CommandResult {
 			AnomalyDelta: 1,
 		}
 	}
-	
+
 	if len(args) == 0 {
 		return CommandResult{
 			Success:   false,
@@ -740,7 +739,7 @@ func (c *SwitchCommand) Execute(args []string, state *GameState) CommandResult {
 			SCPEffect: "⚠️  WARNING: Specify target containment branch",
 		}
 	}
-	
+
 	// Handle -c flag for creating new branch
 	if args[0] == "-c" {
 		if len(args) < 2 {
@@ -750,9 +749,9 @@ func (c *SwitchCommand) Execute(args []string, state *GameState) CommandResult {
 				SCPEffect: "⚠️  WARNING: Specify new containment branch name",
 			}
 		}
-		
+
 		branchName := args[1]
-		
+
 		// Check if branch already exists
 		if _, exists := state.Branches[branchName]; exists {
 			return CommandResult{
@@ -762,21 +761,21 @@ func (c *SwitchCommand) Execute(args []string, state *GameState) CommandResult {
 				AnomalyDelta: 1,
 			}
 		}
-		
+
 		// Create new branch and switch to it
 		state.Branches[branchName] = append([]string{}, state.Branches[state.CurrentBranch]...)
 		state.CurrentBranch = branchName
-		
+
 		return CommandResult{
-			Success:     true,
-			Message:     fmt.Sprintf("Switched to a new branch '%s'", branchName),
-			SCPEffect:   fmt.Sprintf("✅ New containment branch '%s' created and activated", branchName),
+			Success:   true,
+			Message:   fmt.Sprintf("Switched to a new branch '%s'", branchName),
+			SCPEffect: fmt.Sprintf("✅ New containment branch '%s' created and activated", branchName),
 		}
 	}
-	
+
 	// Switch to existing branch
 	branchName := args[0]
-	
+
 	if _, exists := state.Branches[branchName]; !exists {
 		return CommandResult{
 			Success:      false,
@@ -785,13 +784,13 @@ func (c *SwitchCommand) Execute(args []string, state *GameState) CommandResult {
 			AnomalyDelta: 2,
 		}
 	}
-	
+
 	state.CurrentBranch = branchName
-	
+
 	return CommandResult{
-		Success:     true,
-		Message:     fmt.Sprintf("Switched to branch '%s'", branchName),
-		SCPEffect:   fmt.Sprintf("✅ Containment branch switched to '%s'", branchName),
+		Success:   true,
+		Message:   fmt.Sprintf("Switched to branch '%s'", branchName),
+		SCPEffect: fmt.Sprintf("✅ Containment branch switched to '%s'", branchName),
 	}
 }
 
@@ -815,7 +814,7 @@ func (c *MergeCommand) Execute(args []string, state *GameState) CommandResult {
 			AnomalyDelta: 1,
 		}
 	}
-	
+
 	if len(args) == 0 {
 		return CommandResult{
 			Success:   false,
@@ -823,9 +822,9 @@ func (c *MergeCommand) Execute(args []string, state *GameState) CommandResult {
 			SCPEffect: "⚠️  WARNING: Specify source branch for merge",
 		}
 	}
-	
+
 	sourceBranch := args[0]
-	
+
 	// Check if source branch exists
 	sourceCommits, exists := state.Branches[sourceBranch]
 	if !exists {
@@ -836,7 +835,7 @@ func (c *MergeCommand) Execute(args []string, state *GameState) CommandResult {
 			AnomalyDelta: 2,
 		}
 	}
-	
+
 	// Cannot merge into itself
 	if sourceBranch == state.CurrentBranch {
 		return CommandResult{
@@ -845,10 +844,10 @@ func (c *MergeCommand) Execute(args []string, state *GameState) CommandResult {
 			SCPEffect: "✓ Current branch already contains all changes",
 		}
 	}
-	
+
 	// Simulate merge by adding source branch commits to current branch
 	currentCommits := state.Branches[state.CurrentBranch]
-	
+
 	// Find commits that are in source but not in current
 	mergedCount := 0
 	for _, commitID := range sourceCommits {
@@ -864,9 +863,9 @@ func (c *MergeCommand) Execute(args []string, state *GameState) CommandResult {
 			mergedCount++
 		}
 	}
-	
+
 	state.Branches[state.CurrentBranch] = currentCommits
-	
+
 	if mergedCount == 0 {
 		return CommandResult{
 			Success:   true,
@@ -874,13 +873,13 @@ func (c *MergeCommand) Execute(args []string, state *GameState) CommandResult {
 			SCPEffect: "✓ No new containment data to integrate",
 		}
 	}
-	
+
 	// Create merge commit
 	author := "Dr. ████████"
 	if state.ConfigName != "" {
 		author = state.ConfigName
 	}
-	
+
 	mergeCommit := Commit{
 		ID:        generateCommitID(),
 		Message:   fmt.Sprintf("Merge branch '%s' into %s", sourceBranch, state.CurrentBranch),
@@ -889,19 +888,19 @@ func (c *MergeCommand) Execute(args []string, state *GameState) CommandResult {
 		Files:     make(map[string]string),
 		Branch:    state.CurrentBranch,
 	}
-	
+
 	// Add all current files to merge commit
 	for filename, fileState := range state.WorkingDir {
 		mergeCommit.Files[filename] = fileState.Hash
 	}
-	
+
 	state.Commits = append(state.Commits, mergeCommit)
 	state.Branches[state.CurrentBranch] = append(state.Branches[state.CurrentBranch], mergeCommit.ID)
-	
+
 	return CommandResult{
-		Success:     true,
-		Message:     fmt.Sprintf("Merged %d commits from '%s' into %s", mergedCount, sourceBranch, state.CurrentBranch),
-		SCPEffect:   fmt.Sprintf("✅ Containment strategies merged. %d protocols integrated.", mergedCount),
+		Success:   true,
+		Message:   fmt.Sprintf("Merged %d commits from '%s' into %s", mergedCount, sourceBranch, state.CurrentBranch),
+		SCPEffect: fmt.Sprintf("✅ Containment strategies merged. %d protocols integrated.", mergedCount),
 	}
 }
 

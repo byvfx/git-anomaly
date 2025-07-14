@@ -6,23 +6,21 @@ import (
 
 func TestNewGameState(t *testing.T) {
 	state := NewGameState()
-	
+
 	if state == nil {
 		t.Fatal("NewGameState returned nil")
 	}
-	
+
 	if state.IsInitialized {
 		t.Error("New game state should not be initialized")
 	}
-	
+
 	if state.AnomalyLevel != 0 {
 		t.Errorf("Expected anomaly level 0, got %d", state.AnomalyLevel)
 	}
-	
-	if state.ResearcherSanity != 100 {
-		t.Errorf("Expected researcher sanity 100, got %d", state.ResearcherSanity)
-	}
-	
+
+	// Sanity system removed in v0.3.0
+
 	if state.ContainmentStatus != "SECURE" {
 		t.Errorf("Expected containment status SECURE, got %s", state.ContainmentStatus)
 	}
@@ -41,13 +39,13 @@ func TestUpdateContainmentStatus(t *testing.T) {
 		{"Critical", 80, "CRITICAL"},
 		{"Critical Max", 100, "CRITICAL"},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			state := NewGameState()
 			state.AnomalyLevel = tt.anomalyLevel
 			state.UpdateContainmentStatus()
-			
+
 			if state.ContainmentStatus != tt.expected {
 				t.Errorf("Expected status %s for anomaly level %d, got %s",
 					tt.expected, tt.anomalyLevel, state.ContainmentStatus)
@@ -58,12 +56,12 @@ func TestUpdateContainmentStatus(t *testing.T) {
 
 func TestIncreaseAnomaly(t *testing.T) {
 	state := NewGameState()
-	
+
 	state.IncreaseAnomaly(10)
 	if state.AnomalyLevel != 25 {
 		t.Errorf("Expected anomaly level 25, got %d", state.AnomalyLevel)
 	}
-	
+
 	// Test max cap
 	state.IncreaseAnomaly(200)
 	if state.AnomalyLevel != 100 {
@@ -71,18 +69,4 @@ func TestIncreaseAnomaly(t *testing.T) {
 	}
 }
 
-func TestIncreaseSanity(t *testing.T) {
-	state := NewGameState()
-	state.ResearcherSanity = 50
-	
-	state.IncreaseSanity(20)
-	if state.ResearcherSanity != 70 {
-		t.Errorf("Expected sanity 70, got %d", state.ResearcherSanity)
-	}
-	
-	// Test max cap
-	state.IncreaseSanity(50)
-	if state.ResearcherSanity != 100 {
-		t.Errorf("Sanity should be capped at 100, got %d", state.ResearcherSanity)
-	}
-}
+// TestIncreaseSanity removed - sanity system deprecated in v0.3.0

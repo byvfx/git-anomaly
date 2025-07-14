@@ -94,4 +94,3 @@ func (gs *GameState) IncreaseAnomaly(delta int) {
 	}
 	gs.UpdateContainmentStatus()
 }
-

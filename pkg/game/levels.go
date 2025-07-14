@@ -131,15 +131,15 @@ ACTION: Document all changes for pattern analysis`,
 		if len(state.Commits) < 2 {
 			return false, "Modifications not yet committed"
 		}
-		
+
 		// Check that the player used git diff or status (tracked by command history)
 		// For now, we'll just check that they made a commit
 		lastCommit := state.Commits[len(state.Commits)-1]
-		
+
 		if len(lastCommit.Files) < 3 {
 			return false, "Not all modified files were committed"
 		}
-		
+
 		return true, "✅ All modifications documented. Pattern analysis complete."
 	},
 
@@ -147,7 +147,7 @@ ACTION: Document all changes for pattern analysis`,
 	UnlocksNext: []int{3},
 }
 
-// Level3 - Historical Analysis  
+// Level3 - Historical Analysis
 var Level3 = Level{
 	ID:          3,
 	Title:       "Historical Analysis",
@@ -157,10 +157,10 @@ var Level3 = Level{
 	Objective:   "Use git log, git log -p, and git show to understand the anomaly's evolution",
 
 	InitialFiles: map[string]string{
-		"anomaly.txt":     "ERROR ERROR ERROR ERROR\nThe pattern is changing...",
-		"research.log":    "Day 3: Entity shows learning behavior\nDay 4: Patterns detected in modifications",
-		"timeline.txt":    "Tracking anomaly evolution over time",
-		"analysis.txt":    "Pattern analysis results pending...",
+		"anomaly.txt":  "ERROR ERROR ERROR ERROR\nThe pattern is changing...",
+		"research.log": "Day 3: Entity shows learning behavior\nDay 4: Patterns detected in modifications",
+		"timeline.txt": "Tracking anomaly evolution over time",
+		"analysis.txt": "Pattern analysis results pending...",
 	},
 
 	RequiredCommands: []string{"git log", "git log -p", "git show"},
@@ -184,7 +184,7 @@ ACTION: Deep forensic analysis of all commits`,
 		if len(state.Commits) < 3 {
 			return false, "Insufficient historical data for analysis"
 		}
-		
+
 		// This level is complete once enough history exists
 		// In a real implementation, we'd track if git log commands were used
 		return true, "✅ Historical analysis complete. Entity patterns documented."
@@ -204,11 +204,11 @@ var Level4 = Level{
 	Objective:   "Create branches for different strategies, test approaches, and merge successful containment",
 
 	InitialFiles: map[string]string{
-		"core.sys":        "CRITICAL: System core - handle with extreme care",
-		"anomaly.exe":     "ACTIVE THREAT - DO NOT EXECUTE",
-		"strategy_a.txt":  "Containment Strategy A: Isolation Protocol",
-		"strategy_b.txt":  "Containment Strategy B: Neutralization Protocol",
-		"monitor.log":     "Real-time anomaly behavior tracking",
+		"core.sys":       "CRITICAL: System core - handle with extreme care",
+		"anomaly.exe":    "ACTIVE THREAT - DO NOT EXECUTE",
+		"strategy_a.txt": "Containment Strategy A: Isolation Protocol",
+		"strategy_b.txt": "Containment Strategy B: Neutralization Protocol",
+		"monitor.log":    "Real-time anomaly behavior tracking",
 	},
 
 	RequiredCommands: []string{"git branch", "git switch", "git merge"},
@@ -233,13 +233,13 @@ ACTION: Implement branching strategy immediately`,
 		if len(state.Branches) < 3 {
 			return false, "Insufficient parallel experiments (need at least 3 branches)"
 		}
-		
+
 		// Check for merge (main branch should have commits from other branches)
 		mainCommits := state.Branches["main"]
 		if len(mainCommits) < 4 {
 			return false, "No successful strategies merged to main branch"
 		}
-		
+
 		return true, "✅ Optimal containment strategy identified and implemented."
 	},
 

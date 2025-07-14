@@ -27,11 +27,11 @@ func (e *Engine) StartLevel(levelNum int) error {
 	if level == nil {
 		return fmt.Errorf("level %d not found", levelNum)
 	}
-	
+
 	e.CurrentLevel = level
 	e.LevelNum = levelNum
 	e.State.CurrentLevel = levelNum
-	
+
 	// Initialize working directory with level files
 	e.State.WorkingDir = make(map[string]FileState)
 	for filename, content := range level.InitialFiles {
@@ -42,7 +42,7 @@ func (e *Engine) StartLevel(levelNum int) error {
 			Hash:     hashContent(content),
 		}
 	}
-	
+
 	return nil
 }
 
@@ -56,18 +56,18 @@ func (e *Engine) ProcessCommand(input string) CommandResult {
 			Message: "No command entered",
 		}
 	}
-	
+
 	// Handle git commands
 	if parts[0] == "git" && len(parts) > 1 {
 		gitCmd := parts[1]
 		args := parts[2:]
-		
+
 		if cmd, exists := CommandRegistry[gitCmd]; exists {
 			result := cmd.Execute(args, e.State)
-			
+
 			// Update game state based on result
 			e.State.IncreaseAnomaly(result.AnomalyDelta)
-			
+
 			// Check for level completion
 			if e.CurrentLevel != nil {
 				if completed, msg := e.CurrentLevel.ValidateFunc(e.State); completed {
@@ -78,10 +78,10 @@ func (e *Engine) ProcessCommand(input string) CommandResult {
 					e.State.CompletedLevels = append(e.State.CompletedLevels, e.LevelNum)
 				}
 			}
-			
+
 			return result
 		}
-		
+
 		return CommandResult{
 			Success:      false,
 			Message:      fmt.Sprintf("git: '%s' is not a git command", gitCmd),
@@ -89,7 +89,7 @@ func (e *Engine) ProcessCommand(input string) CommandResult {
 			AnomalyDelta: 5,
 		}
 	}
-	
+
 	// Handle non-git commands
 	switch parts[0] {
 	case "help":
@@ -127,13 +127,12 @@ func (e *Engine) ProcessCommand(input string) CommandResult {
 	}
 }
 
-
 // IsLevelComplete checks if the current level is complete
 func (e *Engine) IsLevelComplete() bool {
 	if e.CurrentLevel == nil {
 		return false
 	}
-	
+
 	completed, _ := e.CurrentLevel.ValidateFunc(e.State)
 	return completed
 }

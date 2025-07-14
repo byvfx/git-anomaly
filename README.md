@@ -2,13 +2,13 @@
 
 An interactive CLI game that teaches Git concepts through an SCP Foundation horror/mystery narrative.
 
-## 🎮 About
+## About
 
 You are a newly assigned Junior Researcher in the SCP Foundation's Digital Anomalies Division. Your assignment: contain an anomalous self-modifying codebase using proper Git procedures. But be careful - each command you execute teaches the entity more about our reality...
 
 > ⚠️ **Early Development Notice**: This game is currently in early development. Features, gameplay mechanics, and story elements are subject to change. Some planned features may not yet be implemented.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation
 
@@ -20,24 +20,15 @@ cd git-anomaly
 # Build the game
 make build
 
-# Run the game (modern TUI interface)
+# Run the game
 make run
 
-# Or run with classic CLI interface
-./bin/scp-git --classic
+# Or run directly
+./bin/scp-git
 ```
 
-### Alternative: Direct Go Run
 
-```bash
-# Modern TUI interface (default)
-go run main.go
-
-# Classic CLI interface
-go run main.go --classic
-```
-
-## 🎯 How to Play
+##  How to Play
 
 > **📋 Note**: The modern TUI interface is temporarily on hold while we focus on perfecting the core CLI experience. The classic CLI now provides the complete game with all enhanced features including tab completion and command history.
 
@@ -47,7 +38,7 @@ Experience the complete game through our improved command-line interface featuri
 - 📜 **Command History**: Navigate previous commands with up/down arrows
 - 🎓 **Official Git Tutorial**: 4 progressive levels following proven Git learning structure
 - 🎨 **SCP Theming**: Full Foundation aesthetic with color-coded output
-- 🔧 **Advanced Git Commands**: Complete git workflow from config to merge
+- 🔧 **Git Commands**: Complete git workflow from config to merge
 
 ### Gameplay
 1. Type `start` to begin containment protocols
@@ -85,7 +76,7 @@ Experience the complete game through our improved command-line interface featuri
    - **Researcher Sanity**: Decreases with stress (0% = game over)  
    - **Containment Status**: SECURE → BREACH → CRITICAL
 
-## 📋 Commands
+## Commands
 
 ### System Commands
 | Command | Description |
@@ -94,7 +85,6 @@ Experience the complete game through our improved command-line interface featuri
 | `start` | Begin the game |
 | `status` | Check current game status |
 | `brief` / `briefing` | Re-display current level objectives |
-| `breathe` | Take a moment to recover sanity (+5%) |
 | `clear` | Clear the screen |
 | `quit` | Exit the game |
 
@@ -119,7 +109,7 @@ Experience the complete game through our improved command-line interface featuri
 | `git checkout <branch>` | Switch branches (classic) |
 | `git merge <branch>` | Merge containment strategies |
 
-## 🏗️ Building from Source
+## Building from Source
 
 ### Requirements
 
@@ -142,7 +132,7 @@ make test
 make fmt
 ```
 
-## 📚 Game Progression
+## Game Progression
 
 Following the official Git tutorial structure for optimal learning:
 
@@ -158,11 +148,8 @@ Investigate the entity's behavior patterns through commit history. Master log an
 ### Level 4: Parallel Containment Strategies
 Implement multiple containment approaches using branches, then merge successful strategies. Advanced workflow management.
 
-## 🤝 Contributing
 
-This is a learning project designed to teach Git concepts through interactive storytelling. Contributions are welcome!
-
-## 📜 License
+## License
 
 This project is open source and available under the MIT License.
 
